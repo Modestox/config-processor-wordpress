@@ -4,7 +4,7 @@
  *
  * @copyright Copyright (c) 2026 Sergey Kuzmitsky
  * @license   MIT
- * @link      https://github.com/Modestox/config-processor-wordpress-
+ * @link      https://github.com/Modestox/config-processor-wordpress
  */
 
 /**
@@ -36,10 +36,10 @@ if (file_exists($autoloader)) {
  * Validates that the core library was successfully linked via Composer path repositories.
  */
 add_action('activate_modestox-config-processor-wp/modestox-config-processor-wp.php', function (): void {
-    if (!class_exists(\Modestox\ConfigProcessor\Validator\SystemConfig\Fields::class)) {
+    if (!class_exists(\Modestox\ConfigProcessor\Processor::class)) {
         wp_die(
             esc_html__(
-                'Modestox Config Processor library is missing. Please run "composer install" inside the plugin directory.',
+                'Modestox Config Processor core library is missing or autoloader is not initialized. Please ensure dependencies are installed.',
                 'modestox-config-processor-wp',
             ),
         );

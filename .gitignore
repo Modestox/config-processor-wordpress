@@ -3,7 +3,4 @@
 .vscode/
 .DS_Store
 Thumbs.db
-*.log
-
-composer.json
-composer.lock
+*.logxnj

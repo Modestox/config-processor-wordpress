@@ -96,8 +96,20 @@ class FieldRender
         $label = (string)($data['label'] ?? $key);
         $optionName = (string)($data['_option_name'] ?? ('mtx_sys_config_' . $key));
         $uniqueId = 'config_' . $optionName;
+
+        $dependsData = isset($data['depends']) ? json_encode($data['depends'], JSON_UNESCAPED_SLASHES) : '';
+        $styleAttr = '';
+
+        if ($dependsData !== '') {
+            $isVisible = $this->checkDependencies((array)$data['depends'], $optionName, $key);
+            if (!$isVisible) {
+                $styleAttr = ' style="display: none;"';
+            }
+        }
+
+        $rowAttrs = $dependsData !== '' ? ' class="mtx-dependent-row" data-depends="' . esc_attr($dependsData) . '"' . $styleAttr : '';
         ?>
-        <tr>
+        <tr<?php echo $rowAttrs; ?>>
             <th scope="row"><label for="<?php echo esc_attr($uniqueId); ?>"><?php echo esc_html($label); ?></label></th>
             <td>
                 <?php $this->renderFieldContent($key, $data); ?>
@@ -118,8 +130,20 @@ class FieldRender
         $label = (string)($data['label'] ?? $key);
         $optionName = (string)($data['_option_name'] ?? ('mtx_sys_config_' . $key));
         $uniqueId = 'config_' . $optionName;
+
+        $dependsData = isset($data['depends']) ? json_encode($data['depends'], JSON_UNESCAPED_SLASHES) : '';
+        $styleAttr = '';
+
+        if ($dependsData !== '') {
+            $isVisible = $this->checkDependencies((array)$data['depends'], $optionName, $key);
+            if (!$isVisible) {
+                $styleAttr = ' style="display: none;"';
+            }
+        }
+
+        $rowAttrs = $dependsData !== '' ? ' class="mtx-sys-config-form-row mtx-dependent-row" data-depends="' . esc_attr($dependsData) . '"' . $styleAttr : ' class="mtx-sys-config-form-row"';
         ?>
-        <div class="mtx-sys-config-form-row">
+        <div<?php echo $rowAttrs; ?>>
             <label for="<?php echo esc_attr($uniqueId); ?>"><?php echo esc_html($label); ?></label>
             <?php $this->renderFieldContent($key, $data); ?>
         </div>
@@ -139,5 +163,32 @@ class FieldRender
         if (isset($this->renderers[$type])) {
             $this->renderers[$type]->render($key, $data);
         }
+    }
+
+    /**
+     * Resolves master field option name from database and verifies if current row meets visibility conditions.
+     *
+     * @param array<string, mixed> $dependencies
+     * @param string $currentOptionName Full database key of the active dependent field.
+     * @param string $currentFieldKey Short key identifier of the active dependent field.
+     * @return bool True if row should be visible on initial server render, false otherwise.
+     */
+    private function checkDependencies(array $dependencies, string $currentOptionName, string $currentFieldKey): bool
+    {
+        foreach ($dependencies as $masterKey => $expectedValue) {
+            // Derive master option name from current option namespace
+            $masterOptionName = str_replace('_' . $currentFieldKey, '_' . $masterKey, $currentOptionName);
+            $currentMasterValue = get_option($masterOptionName, '0');
+
+            if (is_bool($currentMasterValue)) {
+                $currentMasterValue = $currentMasterValue ? '1' : '0';
+            }
+
+            if ((string)$currentMasterValue !== (string)$expectedValue) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

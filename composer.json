@@ -1,0 +1,24 @@
+{
+  "name": "modestox/config-processor-wordpress",
+  "description": "WordPress integration plugin for Modestox Config Processor",
+  "homepage": "https://github.com/Modestox/config-processor-wordpress",
+  "type": "wordpress-plugin",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Sergey Kuzmitsky",
+      "email": "ubuntu.ksm@gmail.com",
+      "homepage": "https://github.com/modestox"
+    }
+  ],
+  "require": {
+    "php": ">=8.3",
+    "composer/installers": "^2.0",
+    "modestox/config-processor": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Modestox\\ConfigProcessorWp\\": "src/"
+    }
+  }
+}

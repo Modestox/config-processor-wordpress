@@ -1,0 +1,74 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "2a63e94b811e8326d99e05f8ba2c45a3",
+    "packages": [
+        {
+            "name": "modestox/config-processor",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Modestox/config-processor.git",
+                "reference": "bb743e99dec7ce05b3b4f93a7aadcc8750684be3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Modestox/config-processor/zipball/bb743e99dec7ce05b3b4f93a7aadcc8750684be3",
+                "reference": "bb743e99dec7ce05b3b4f93a7aadcc8750684be3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Modestox\\ConfigProcessor\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Sergey Kuzmitsky",
+                    "email": "ubuntu.ksm@gmail.com",
+                    "homepage": "https://github.com/modestox"
+                }
+            ],
+            "description": "Configuration schema validation and processing library for PHP",
+            "homepage": "https://github.com/Modestox/config-processor",
+            "keywords": [
+                "Settings",
+                "config",
+                "configuration",
+                "php",
+                "schema",
+                "validator"
+            ],
+            "support": {
+                "issues": "https://github.com/Modestox/config-processor/issues",
+                "source": "https://github.com/Modestox/config-processor/tree/v1.0.0"
+            },
+            "time": "2026-06-08T20:31:12+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": true,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=8.3"
+    },
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
+}

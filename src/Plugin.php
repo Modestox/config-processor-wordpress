@@ -131,6 +131,10 @@ class Plugin
                 // Enqueue JavaScript operational engine component layout nodes
                 $jsUrl = plugins_url('assets/js/admin-fields.js', $basePath);
                 wp_enqueue_script('modestox-admin-fields', $jsUrl, [], '1.0.0', true);
+
+                // Enqueue Additional JavaScript asset component (e.g., depends-engine or custom logic)
+                $customJsUrl = plugins_url('assets/js/admin-depends.js', $basePath);
+                wp_enqueue_script('modestox-admin-depends', $customJsUrl, ['modestox-admin-fields'], '1.0.0', true);
                 break;
             }
         }
