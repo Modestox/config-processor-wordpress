@@ -9,44 +9,41 @@
 
 /**
  * Plugin Name: Modestox Config Processor Integration Wordpress
- * Description: Integrates the strict PHP 8.3 Modestox Config Processor component into WordPress 7.0.
+ * Description: Integrates the strict PHP 8.3 Modestox Config Processor component into WordPress.
  * Version:     1.0.0
  * Author:      Sergey Kuzmitsky
  * License:     MIT
  * Requires PHP: 8.3
+ * Text Domain:  modestox-config-processor-wp
+ * Domain Path:  /languages
  */
 
 declare(strict_types=1);
 
 namespace Modestox\ConfigProcessorWp;
 
-// Prevent direct access to the file outside the WordPress environment
 if (!defined('ABSPATH')) {
     exit;
 }
 
-// Initialize the plugin's isolated Composer autoloader
+// Initialize Composer Autoloader
 $autoloader = __DIR__ . '/vendor/autoload.php';
 if (file_exists($autoloader)) {
     require_once $autoloader;
 }
 
 /**
- * Activation hook callback.
- * Validates that the core library was successfully linked via Composer path repositories.
+ * Returns the main operational instance of the plugin adapter.
+ * Replaces old-school $GLOBALS entries with a clean, type-hinted function wrapper.
+ *
+ * @return Plugin
  */
-add_action('activate_modestox-config-processor-wp/modestox-config-processor-wp.php', function (): void {
-    if (!class_exists(\Modestox\ConfigProcessor\Processor::class)) {
-        wp_die(
-            esc_html__(
-                'Modestox Config Processor core library is missing or autoloader is not initialized. Please ensure dependencies are installed.',
-                'modestox-config-processor-wp',
-            ),
-        );
-    }
-});
-
-// Bootstrap the core plugin logic
-if (class_exists(Plugin::class)) {
-    (new Plugin())->initialize();
+function modestoxConfigAdapter(): Plugin
+{
+    return Plugin::instance();
 }
+
+// Bootstrap the plugin adapter lifecycle on WordPress initialization
+add_action('plugins_loaded', static function (): void {
+    modestoxConfigAdapter()->boot();
+});

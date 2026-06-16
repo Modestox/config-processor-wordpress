@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class Radio
  *
- * Generates standard multi-choice linear option button lists.
+ * Renders standard radio button option lists.
  */
 class Radio extends AbstractField
 {
     /**
-     * Renders sets of associated administrative radio nodes.
+     * Renders standard radio input HTML markup.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData
@@ -36,7 +36,7 @@ class Radio extends AbstractField
                     <input type="radio"
                            name="<?php echo esc_attr($attr['option_name']); ?>"
                            value="<?php echo esc_attr((string)$value); ?>"
-                        <?php checked($attr['value'], (string)$value); ?> />
+                            <?php checked($attr['value'], (string)$value); ?> />
                     <?php echo esc_html(trim((string)$label)); ?>
                 </label>
             <?php endforeach; ?>

@@ -16,17 +16,16 @@ use Modestox\ConfigProcessorWp\Exception\ConfigurationCollisionException;
 /**
  * Class ConfigMerger
  *
- * Performs lightning-fast, flat configuration merges with strict unique machine path validation.
+ * Merges configuration schemas with validation of unique field paths.
  */
 class ConfigMerger
 {
     /**
-     * Aggregates configuration streams and throws an exception strictly on duplicate field paths.
-     * Presentation metadata conflicts (labels, icons) are naturally overwritten by the trailing plugin.
+     * Merges multiple configuration payloads into a single unified schema layout.
      *
-     * @param array<string, mixed> $rawGlobalFilters Raw array of structures aggregated from the filter stream.
-     * @return array<string, mixed> Complete validated unified schema matrix.
-     * @throws ConfigurationCollisionException If an identical section/group/field path key is detected twice.
+     * @param array<int, array<string, mixed>> $rawGlobalFilters
+     * @return array<string, mixed>
+     * @throws ConfigurationCollisionException
      */
     public static function mergeGlobalRegistry(array $rawGlobalFilters): array
     {
@@ -35,15 +34,29 @@ class ConfigMerger
             'sections' => [],
         ];
 
-        // Flat lookup map to enforce unique field coordinates: 'sec/group/field' => pluginSlug
         $pathRegistry = [];
+        $registeredPlugins = [];
 
-        foreach ($rawGlobalFilters as $pluginSlug => $pluginConfig) {
-            if (!is_array($pluginConfig)) {
+        foreach ($rawGlobalFilters as $filterPayload) {
+            if (!is_array($filterPayload)) {
                 continue;
             }
 
-            // 1. Merge Tabs (Last one naturally updates labels/icons)
+            $pluginSlug = (string)($filterPayload['plugin'] ?? '');
+            $pluginConfig = $filterPayload['schema'] ?? null;
+
+            if ($pluginSlug === '' || !is_array($pluginConfig)) {
+                continue;
+            }
+
+            if (isset($registeredPlugins[$pluginSlug])) {
+                throw new ConfigurationCollisionException(
+                    sprintf("Plugin identifier '%s' is registered multiple times.", $pluginSlug)
+                );
+            }
+            $registeredPlugins[$pluginSlug] = true;
+
+            // 1. Merge Tabs
             if (isset($pluginConfig['tabs']) && is_array($pluginConfig['tabs'])) {
                 $globalSchema['tabs'] = array_merge($globalSchema['tabs'], $pluginConfig['tabs']);
             }
@@ -54,7 +67,6 @@ class ConfigMerger
                     if (!isset($globalSchema['sections'][$secKey])) {
                         $globalSchema['sections'][$secKey] = $secData;
                     } else {
-                        // Section already exists. Overwrite top-level metadata (label, tab, sort_order)
                         foreach ($secData as $metaKey => $metaValue) {
                             if ($metaKey !== 'groups') {
                                 $globalSchema['sections'][$secKey][$metaKey] = $metaValue;
@@ -72,7 +84,6 @@ class ConfigMerger
                             if (!isset($globalSchema['sections'][$secKey]['groups'][$groupKey])) {
                                 $globalSchema['sections'][$secKey]['groups'][$groupKey] = $groupData;
                             } else {
-                                // Group already exists. Overwrite its metadata (label, sort_order)
                                 foreach ($groupData as $metaKey => $metaValue) {
                                     if ($metaKey !== 'fields') {
                                         $globalSchema['sections'][$secKey]['groups'][$groupKey][$metaKey] = $metaValue;
@@ -80,7 +91,7 @@ class ConfigMerger
                                 }
                             }
 
-                            // 4. Process Fields with Absolute Unique Guardrail
+                            // 4. Process Fields
                             if (isset($groupData['fields']) && is_array($groupData['fields'])) {
                                 if (!isset($globalSchema['sections'][$secKey]['groups'][$groupKey]['fields'])) {
                                     $globalSchema['sections'][$secKey]['groups'][$groupKey]['fields'] = [];
@@ -89,20 +100,18 @@ class ConfigMerger
                                 foreach ($groupData['fields'] as $fieldKey => $fieldData) {
                                     $pathHash = sprintf('%s/%s/%s', $secKey, $groupKey, $fieldKey);
 
-                                    // If this exact coordinate already exists — we have a real collision
                                     if (isset($pathRegistry[$pathHash])) {
                                         throw new ConfigurationCollisionException(
                                             sprintf(
-                                                "Configuration field collision detected! Unique field path '%s' is duplicated by plugin '%s' and plugin '%s'.",
+                                                "Field path collision detected: '%s' is duplicated by plugin '%s' and plugin '%s'.",
                                                 $pathHash,
                                                 $pluginSlug,
-                                                $pathRegistry[$pathHash],
-                                            ),
+                                                $pathRegistry[$pathHash]
+                                            )
                                         );
                                     }
 
-                                    // Register the path and save the field definition
-                                    $pathRegistry[$pathHash] = (string)$pluginSlug;
+                                    $pathRegistry[$pathHash] = $pluginSlug;
                                     $globalSchema['sections'][$secKey]['groups'][$groupKey]['fields'][$fieldKey] = $fieldData;
                                 }
                             }

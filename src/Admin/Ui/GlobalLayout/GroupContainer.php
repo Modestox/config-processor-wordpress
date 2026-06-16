@@ -17,7 +17,7 @@ use Modestox\ConfigProcessorWp\Admin\OptionNameBuilder;
 /**
  * Class GroupContainer
  *
- * Handles the rendering of configuration group boxes and their associated fields inside the global viewport.
+ * Renders configuration group containers and their fields.
  */
 class GroupContainer
 {
@@ -25,15 +25,15 @@ class GroupContainer
      * GroupContainer constructor.
      *
      * @param array<string, array<string, mixed>> $groups
-     * @param string $namespace Base configuration naming prefix combined with section key.
+     * @param string $namespace
      */
     public function __construct(
-        private readonly array $groups,
-        private readonly string $namespace
+            private readonly array $groups,
+            private readonly string $namespace
     ) {}
 
     /**
-     * Renders global group box components block mapped to standard tables.
+     * Renders configuration group boxes with standard tables.
      *
      * @return void
      */
@@ -42,13 +42,13 @@ class GroupContainer
         foreach ($this->groups as $groupKey => $groupData) {
             $fields = (array)($groupData['fields'] ?? []);
 
-            // Динамически генерируем полные уникальные имена на основе структуры массива
+            // Dynamically generate unique database keys based on layout hierarchy
             foreach ($fields as $fKey => &$field) {
                 if (!isset($field['_option_name'])) {
                     $field['_option_name'] = OptionNameBuilder::build(
-                        $this->namespace,
-                        (string)$groupKey,
-                        (string)$fKey
+                            $this->namespace,
+                            (string)$groupKey,
+                            (string)$fKey
                     );
                     $field['option_name'] = $field['_option_name'];
                 }

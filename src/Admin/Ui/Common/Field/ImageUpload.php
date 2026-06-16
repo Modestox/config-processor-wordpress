@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class ImageUpload
  *
- * Generates resource links matching native media management file assets frameworks with live preview state.
+ * Renders file upload inputs with media library integration and preview blocks.
  */
 class ImageUpload extends AbstractField
 {
     /**
-     * Renders native file management paths layout blocks with live asset preview cards.
+     * Renders media upload element markup.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData
@@ -36,14 +36,15 @@ class ImageUpload extends AbstractField
                    id="<?php echo esc_attr($attr['id']); ?>"
                    name="<?php echo esc_attr($attr['option_name']); ?>"
                    value="<?php echo esc_attr($imageUrl); ?>"
-                   class="mtx-image-value-target" />
+                   class="mtx-image-value-target"/>
 
             <div class="mtx-media-preview-box" style="<?php echo $hasImage ? '' : 'display: none;'; ?>">
                 <div class="mtx-preview-browser-mockup">
-                    <img src="<?php echo esc_url($imageUrl); ?>" class="mtx-preview-image-node" alt="Favicon preview" />
+                    <img src="<?php echo esc_url($imageUrl); ?>" class="mtx-preview-image-node"
+                         alt="<?php echo esc_attr__('Site asset preview', 'modestox-config-processor-wp'); ?>"/>
                     <div class="mtx-preview-browser-tab">
-                        <img src="<?php echo esc_url($imageUrl); ?>" class="mtx-preview-favicon-node" alt="" />
-                        <span>Config Test</span>
+                        <img src="<?php echo esc_url($imageUrl); ?>" class="mtx-preview-favicon-node" alt=""/>
+                        <span><?php echo esc_html(get_bloginfo('name')); ?></span>
                         <span class="dashicons dashicons-no-alt"></span>
                     </div>
                 </div>
@@ -53,16 +54,19 @@ class ImageUpload extends AbstractField
                 <button type="button"
                         class="button button-secondary mtx-media-upload-trigger"
                         data-target="<?php echo esc_attr($attr['id']); ?>"
-                        data-label-upload="<?php esc_attr_e('Upload Logo'); ?>"
-                        data-label-change="<?php esc_attr_e('Change Site Icon'); ?>">
-                    <?php echo $hasImage ? esc_html__('Change') : esc_html__('Upload Logo'); ?>
+                        data-label-upload="<?php echo esc_attr__('Upload Logo', 'modestox-config-processor-wp'); ?>"
+                        data-label-change="<?php echo esc_attr__('Change Site Icon', 'modestox-config-processor-wp'); ?>">
+                    <?php echo $hasImage ? esc_html__('Change', 'modestox-config-processor-wp') : esc_html__(
+                            'Upload Logo',
+                            'modestox-config-processor-wp',
+                    ); ?>
                 </button>
 
                 <button type="button"
                         class="button mtx-media-remove-trigger"
                         data-target="<?php echo esc_attr($attr['id']); ?>"
                         style="<?php echo $hasImage ? '' : 'display: none;'; ?>">
-                    <?php esc_html_e('Remove'); ?>
+                    <?php echo esc_html__('Remove', 'modestox-config-processor-wp'); ?>
                 </button>
             </div>
         </div>

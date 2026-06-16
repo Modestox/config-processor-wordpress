@@ -29,13 +29,11 @@ use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\InfoBlock;
 /**
  * Class FieldRender
  *
- * Renders form fields using specific layout strategies.
+ * Directs layout generation mapping field types to specific input renders.
  */
 class FieldRender
 {
     /**
-     * Internal registry mapping field types to their designated renderer objects.
-     *
      * @var array<string, object>
      */
     private array $renderers = [];
@@ -43,8 +41,8 @@ class FieldRender
     /**
      * FieldRender constructor.
      *
-     * @param array<string, array<string, mixed>> $fields Raw or schema-processed field configurations.
-     * @param string $mode Layout presentation mode ('table' or 'div').
+     * @param array<string, array<string, mixed>> $fields
+     * @param string $mode
      */
     public function __construct(
             private readonly array $fields,
@@ -69,7 +67,7 @@ class FieldRender
     }
 
     /**
-     * Iterates through the field collection and routes rendering to the appropriate layout row method.
+     * Iterates through the field collection to execute row layout maps.
      *
      * @return void
      */
@@ -85,10 +83,10 @@ class FieldRender
     }
 
     /**
-     * Outputs a single configuration field wrapped inside a standard WordPress administrative table row framework.
+     * Outputs a field row wrapped in a standard WordPress table layout.
      *
-     * @param string $key Unique identifier or structural key of the field.
-     * @param array<string, mixed> $data Configuration metadata including labels and types.
+     * @param string $key
+     * @param array<string, mixed> $data
      * @return void
      */
     private function renderTableRow(string $key, array $data): void
@@ -119,10 +117,10 @@ class FieldRender
     }
 
     /**
-     * Outputs a single configuration field wrapped inside a modern flexible div container element block.
+     * Outputs a field row wrapped in a custom div layout.
      *
-     * @param string $key Unique identifier or structural key of the field.
-     * @param array<string, mixed> $data Configuration metadata including labels and types.
+     * @param string $key
+     * @param array<string, mixed> $data
      * @return void
      */
     private function renderDivRow(string $key, array $data): void
@@ -141,7 +139,9 @@ class FieldRender
             }
         }
 
-        $rowAttrs = $dependsData !== '' ? ' class="mtx-sys-config-form-row mtx-dependent-row" data-depends="' . esc_attr($dependsData) . '"' . $styleAttr : ' class="mtx-sys-config-form-row"';
+        $rowAttrs = $dependsData !== '' ? ' class="mtx-sys-config-form-row mtx-dependent-row" data-depends="' . esc_attr(
+                        $dependsData,
+                ) . '"' . $styleAttr : ' class="mtx-sys-config-form-row"';
         ?>
         <div<?php echo $rowAttrs; ?>>
             <label for="<?php echo esc_attr($uniqueId); ?>"><?php echo esc_html($label); ?></label>
@@ -151,10 +151,10 @@ class FieldRender
     }
 
     /**
-     * Extracts the target field type and delegates input markup construction to the registered type renderer class.
+     * Routes content generation to the matching field renderer instance.
      *
-     * @param string $key Unique identifier or structural key of the field.
-     * @param array<string, mixed> $data Configuration metadata including labels and types.
+     * @param string $key
+     * @param array<string, mixed> $data
      * @return void
      */
     private function renderFieldContent(string $key, array $data): void
@@ -166,17 +166,16 @@ class FieldRender
     }
 
     /**
-     * Resolves master field option name from database and verifies if current row meets visibility conditions.
+     * Verifies if master dependency conditions are met during initial render.
      *
      * @param array<string, mixed> $dependencies
-     * @param string $currentOptionName Full database key of the active dependent field.
-     * @param string $currentFieldKey Short key identifier of the active dependent field.
-     * @return bool True if row should be visible on initial server render, false otherwise.
+     * @param string $currentOptionName
+     * @param string $currentFieldKey
+     * @return bool
      */
     private function checkDependencies(array $dependencies, string $currentOptionName, string $currentFieldKey): bool
     {
         foreach ($dependencies as $masterKey => $expectedValue) {
-            // Derive master option name from current option namespace
             $masterOptionName = str_replace('_' . $currentFieldKey, '_' . $masterKey, $currentOptionName);
             $currentMasterValue = get_option($masterOptionName, '0');
 

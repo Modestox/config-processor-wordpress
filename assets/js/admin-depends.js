@@ -1,4 +1,12 @@
-document.addEventListener('DOMContentLoaded', function () {
+/**
+ * Modestox Config Processor Integration Wordpress
+ *
+ * @copyright Copyright (c) 2026 Sergey Kuzmitsky
+ * @license   MIT
+ * @link      https://github.com/Modestox/config-processor-wordpress
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
     /**
      * Initialization of field conditional visibilities (Depends Engine)
      */
@@ -16,7 +24,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const form = row.closest('form') || document.body;
 
                 Object.keys(dependencies).forEach(masterFieldKey => {
-                    // Universal selector search: looks for exact name match, naming prefixes, or array notations
                     const masterSelector = `[name="${masterFieldKey}"], [name$="_${masterFieldKey}"], [name$="[${masterFieldKey}]"], [name$="[${masterFieldKey}][]"]`;
                     const masterInputs = form.querySelectorAll(masterSelector);
 
@@ -43,7 +50,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Initial run to apply the correct visibility states upon DOM page load
         const forms = document.querySelectorAll('form');
         if (forms.length > 0) {
             forms.forEach(form => evaluateFormDependencies(form, masterRegistry));
@@ -53,7 +59,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * Verifies and recalculates the visibility state of dependent container rows
+     * Evaluates and updates the visibility of dependent fields layout rows.
+     *
+     * @param {HTMLElement} container
+     * @param {Object} registry
      */
     function evaluateFormDependencies(container, registry) {
         Object.keys(registry).forEach(masterName => {
@@ -71,7 +80,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
-     * Helper method to extract the control input state value based on HTML types
+     * Extracts active input field value state based on HTML types.
+     *
+     * @param {HTMLElement} container
+     * @param {string} name
+     * @return {string}
      */
     function getInputValue(container, name) {
         const inputs = container.querySelectorAll(`[name="${name}"]`);
@@ -84,39 +97,4 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return inputs[0].value;
     }
-
-    /**
-     * Dynamic Matrix Rows Layout Controls Engine (Dynamic Rows)
-     */
-    const addRowButtons = document.querySelectorAll('.mtx-add-row-btn');
-    addRowButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const tableId = this.getAttribute('data-table');
-            const table = document.getElementById(tableId);
-            if (!table) return;
-
-            const tbody = table.querySelector('.mtx-dynamic-rows-body');
-            const templateHtml = document.getElementById(`${tableId}-template`).innerHTML;
-
-            const index = tbody.querySelectorAll('.mtx-dynamic-row').length;
-            const newRowHtml = templateHtml.replace(/\{\{index\}\}/g, index);
-
-            tbody.insertAdjacentHTML('beforeend', newRowHtml);
-        });
-    });
-
-    document.body.addEventListener('click', function (e) {
-        const removeBtn = e.target.closest('.mtx-remove-row-btn');
-        if (removeBtn) {
-            const row = removeBtn.closest('.mtx-dynamic-row');
-            if (row) {
-                const tbody = row.parentNode;
-                if (tbody.querySelectorAll('.mtx-dynamic-row').length > 1) {
-                    row.remove();
-                } else {
-                    row.querySelectorAll('input').forEach(input => input.value = '');
-                }
-            }
-        }
-    });
 });

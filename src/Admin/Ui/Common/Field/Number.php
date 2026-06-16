@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class Number
  *
- * Generates html5 specific input text field restricted to numerical boundaries.
+ * Renders HTML5 specific numeric input fields with range boundaries.
  */
 class Number extends AbstractField
 {
     /**
-     * Renders targeted numeric range components.
+     * Renders numeric input HTML markup.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData

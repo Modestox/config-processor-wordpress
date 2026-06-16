@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin;
 /**
  * Class OptionNameBuilder
  *
- * Handles standardized generation of database option keys.
+ * Generates standardized database option keys for configuration fields.
  */
 class OptionNameBuilder
 {
     /**
-     * Builds a sanitized unique option key.
+     * Builds a sanitized unique option key string from hierarchy parts.
      *
      * @param string $prefix
      * @param string $group

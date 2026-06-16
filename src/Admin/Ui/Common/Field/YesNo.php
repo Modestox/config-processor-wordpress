@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class YesNo
  *
- * Generates native drop-down elements containing strictly structured Yes/No binary options.
+ * Renders select dropdowns for binary Yes/No choices.
  */
 class YesNo extends AbstractField
 {
     /**
-     * Renders binary choice dropdown controls.
+     * Renders binary selection dropdown HTML markup.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData
@@ -33,8 +33,8 @@ class YesNo extends AbstractField
         <select id="<?php echo esc_attr($attr['id']); ?>"
                 name="<?php echo esc_attr($attr['option_name']); ?>"
                 class="<?php echo esc_attr($attr['classes']); ?>">
-            <option value="1" <?php selected($selectedValue, 1); ?>><?php esc_html_e('Yes'); ?></option>
-            <option value="0" <?php selected($selectedValue, 0); ?>><?php esc_html_e('No'); ?></option>
+            <option value="1" <?php selected($selectedValue, 1); ?>><?php echo esc_html__('Yes', 'modestox-config-processor-wp'); ?></option>
+            <option value="0" <?php selected($selectedValue, 0); ?>><?php echo esc_html__('No', 'modestox-config-processor-wp'); ?></option>
         </select>
 
         <?php if ($attr['comment'] !== ''): ?>

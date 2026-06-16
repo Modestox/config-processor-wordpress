@@ -18,7 +18,7 @@ use Modestox\ConfigProcessorWp\Admin\Ui\GlobalLayout\SectionContainer;
 /**
  * Class Builder
  *
- * Constructs administrative user interfaces based on validated schemas and raw page data.
+ * Coordinates rendering of standalone plugin layouts or multi-section global configurations.
  */
 class Builder
 {
@@ -27,7 +27,7 @@ class Builder
      *
      * @param array<string, mixed> $schema
      * @param array<int, array<string, mixed>> $pageParams
-     * @param string $pageSlug Unique string slug identifier for the current active page context.
+     * @param string $pageSlug
      */
     public function __construct(
             private array $schema,
@@ -36,7 +36,7 @@ class Builder
     ) {}
 
     /**
-     * Dispatches rendering based on the structural schema composition.
+     * Dispatches the layout building process based on layout schema.
      *
      * @return void
      */
@@ -50,7 +50,7 @@ class Builder
     }
 
     /**
-     * Renders standalone plugin layout forms wrapped inside a single global form wrapper.
+     * Renders standalone plugin settings form.
      *
      * @return void
      */
@@ -75,7 +75,7 @@ class Builder
     }
 
     /**
-     * Renders global system configuration screens using architectural split-layout components.
+     * Renders split-layout global system settings screen.
      *
      * @return void
      */
@@ -90,7 +90,7 @@ class Builder
             return;
         }
 
-        // Resolve active target section token context safely from GET constraints
+        // Safely extract the active section from query parameters
         $firstSectionKey = (string)key($sections);
         $activeSection = sanitize_key((string)($_GET['section'] ?? $firstSectionKey));
         if (!isset($sections[$activeSection])) {

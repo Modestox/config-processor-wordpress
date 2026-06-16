@@ -14,12 +14,16 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class DateTime
  *
- * Handles rendering and format conversion for HTML5 date, time, and datetime inputs.
+ * Renders HTML5 date, time, and datetime inputs.
  */
 class DateTime extends AbstractField
 {
     /**
-     * @inheritDoc
+     * Renders temporal input HTML markup.
+     *
+     * @param string $fieldKey
+     * @param array<string, mixed> $fieldData
+     * @return void
      */
     public function render(string $fieldKey, array $fieldData): void
     {
@@ -54,7 +58,7 @@ class DateTime extends AbstractField
     }
 
     /**
-     * Normalizes native incoming browser temporal strings back into strict Core standards.
+     * Normalizes temporal values back to core storage standards.
      *
      * @param mixed $value
      * @param array<string, mixed> $fieldData

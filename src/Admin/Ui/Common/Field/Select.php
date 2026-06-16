@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class Select
  *
- * Generates structured single selection choice dropdown blocks.
+ * Renders standard single selection dropdown menus.
  */
 class Select extends AbstractField
 {
     /**
-     * Renders targeted select structures with dynamic options arrays.
+     * Renders standard dropdown select HTML markup.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData

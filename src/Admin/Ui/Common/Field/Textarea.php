@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class Textarea
  *
- * Generates standard multi-line administrative text area input elements.
+ * Renders standard multi-line text area input fields.
  */
 class Textarea extends AbstractField
 {
     /**
-     * Renders multi-line text input areas.
+     * Renders textarea input HTML markup.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData

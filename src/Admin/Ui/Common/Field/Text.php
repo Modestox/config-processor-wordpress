@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class Text
  *
- * Generates standard single-line administrative text input elements.
+ * Renders standard single-line text input fields.
  */
 class Text extends AbstractField
 {
     /**
-     * Renders the explicit text element input layout using pre-computed attributes.
+     * Renders text input HTML markup.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData

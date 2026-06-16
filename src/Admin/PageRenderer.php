@@ -22,8 +22,7 @@ use Modestox\ConfigProcessorWp\Exception\ConfigurationCollisionException;
 /**
  * Class PageRenderer
  *
- * Coordinates schema validation and routes individual components to build target layouts.
- * Enforces strict hierarchical option naming based on structural keys.
+ * Validates schemas and routes individual components to build target layouts.
  */
 class PageRenderer
 {
@@ -32,7 +31,6 @@ class PageRenderer
 
     /**
      * PageRenderer constructor.
-     * Merges global and plugin configurations while enforcing slug uniqueness.
      *
      * @param array<string, array<string, mixed>> $globalConfigs
      * @param array<string, array<string, mixed>> $pluginConfigs
@@ -58,8 +56,7 @@ class PageRenderer
     }
 
     /**
-     * Iterates through all registered configuration schemas to register WordPress settings.
-     * Maps fields into dynamically isolated option groups locked onto page slugs and section contexts.
+     * Iterates through all registered schemas to initialize WordPress settings.
      *
      * @return void
      * @throws OptionCollisionException
@@ -92,12 +89,12 @@ class PageRenderer
     }
 
     /**
-     * Registers individual setting fields using the OptionNameBuilder into locked screen boundaries.
+     * Registers individual fields using the OptionNameBuilder.
      *
      * @param array<string, mixed> $fields
      * @param string $namespace
      * @param string $groupKey
-     * @param string $optionGroup Target settings fields group identifier bound to the active screen.
+     * @param string $optionGroup
      * @param array<string, bool> $registeredPaths
      * @return void
      * @throws OptionCollisionException
@@ -117,13 +114,12 @@ class PageRenderer
             }
 
             $registeredPaths[$optionName] = true;
-            // Map settings securely inside the isolated database footprint allocation group
             register_setting($optionGroup, $optionName);
         }
     }
 
     /**
-     * Validates schema using the Config Processor and handles the administrative UI rendering.
+     * Validates layout schema configuration and executes administrative UI rendering.
      *
      * @return void
      */
@@ -133,7 +129,13 @@ class PageRenderer
         $pageData = $this->allConfigs[$currentPage] ?? null;
 
         if (!$pageData || !isset($pageData['schema'])) {
-            wp_die('<h3>Modestox Core Error:</h3><p>Schema not found.</p>');
+            wp_die(
+                sprintf(
+                    '<h3>%s</h3><p>%s</p>',
+                    esc_html__('Modestox Core Error:', 'modestox-config-processor-wp'),
+                    esc_html__('Schema not found.', 'modestox-config-processor-wp'),
+                ),
+            );
         }
 
         $schema = (array)$pageData['schema'];
@@ -141,20 +143,24 @@ class PageRenderer
         try {
             $processor = new Processor();
 
-            // Perform structural validation and get the clean schema object
             $cleanSchema = isset($schema['sections'])
                 ? $processor->process($schema, new SystemConfig())
                 : $processor->process($schema, new GroupedConfig());
 
-            // Supply current layout token slug downstream to populate isolation verification rules
             (new Builder($cleanSchema, [$pageData], $currentPage))->render();
         } catch (InvalidConfigException $e) {
-            wp_die(sprintf('<h3>Schema Validation Error:</h3><p>%s</p>', esc_html($e->getMessage())));
+            wp_die(
+                sprintf(
+                    '<h3>%s</h3><p>%s</p>',
+                    esc_html__('Schema Validation Error:', 'modestox-config-processor-wp'),
+                    esc_html($e->getMessage()),
+                ),
+            );
         }
     }
 
     /**
-     * Sanitizes the configuration prefix to ensure valid database option naming.
+     * Sanitizes configuration options prefix string.
      *
      * @param string $prefix
      * @return string

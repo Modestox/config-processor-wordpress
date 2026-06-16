@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class InfoBlock
  *
- * Structural presentation container that bypasses interactive values collection.
+ * Renders non-interactive informational blocks and notices.
  */
 class InfoBlock extends AbstractField
 {
     /**
-     * Renders read-only messaging structural layouts.
+     * Renders read-only notice layouts.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData
@@ -28,7 +28,7 @@ class InfoBlock extends AbstractField
     public function render(string $fieldKey, array $fieldData): void
     {
         $customClass = (string)($fieldData['class'] ?? 'notice notice-info');
-        $rawText = (string)($fieldData['text'] ?? '');
+        $rawText = (string)($fieldData['text'] ?? esc_html__('Information notice text missing.', 'modestox-config-processor-wp'));
         $format = (string)($fieldData['format'] ?? 'plain');
         ?>
         <div class="<?php echo esc_attr(trim($customClass)); ?>" style="margin: 5px 0; padding: 10px;">

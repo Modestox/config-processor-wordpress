@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class Password
  *
- * Generates protected password input elements.
+ * Renders secure password input fields.
  */
 class Password extends AbstractField
 {
     /**
-     * Renders single-line secret credential inputs.
+     * Renders password input HTML markup.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData
@@ -33,7 +33,8 @@ class Password extends AbstractField
                id="<?php echo esc_attr($attr['id']); ?>"
                name="<?php echo esc_attr($attr['option_name']); ?>"
                class="<?php echo esc_attr($attr['classes']); ?>"
-               value="<?php echo esc_attr($attr['value']); ?>"/>
+               value="<?php echo esc_attr($attr['value']); ?>"
+                <?php echo $attr['placeholder'] !== '' ? 'placeholder="' . esc_attr($attr['placeholder']) . '"' : ''; ?> />
 
         <?php if ($attr['comment'] !== ''): ?>
         <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>

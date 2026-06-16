@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class AbstractField
  *
- * Provides shared computational logic and state preparation for administrative input elements.
+ * Base class for all administrative layout input fields.
  */
 abstract class AbstractField
 {
     /**
-     * Renders the specific input component layout.
+     * Renders the input component HTML markup.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData
@@ -28,10 +28,10 @@ abstract class AbstractField
     abstract public function render(string $fieldKey, array $fieldData): void;
 
     /**
-     * Sanitizes the incoming raw $_POST value based on field type specifications.
+     * Sanitizes incoming request value data.
      *
-     * @param mixed $value Raw input from the $_POST stream.
-     * @param array<string, mixed> $fieldData Field configuration metadata context.
+     * @param mixed $value
+     * @param array<string, mixed> $fieldData
      * @return mixed
      */
     public function sanitize(mixed $value, array $fieldData): mixed
@@ -40,11 +40,11 @@ abstract class AbstractField
     }
 
     /**
-     * Extracts and computes common field attributes from the raw schema metadata package.
+     * Computes shared UI parameters and metadata traits for input tags.
      *
-     * @param string               $fieldKey
+     * @param string $fieldKey
      * @param array<string, mixed> $fieldData
-     * @param string               $baseClass Default WordPress CSS class for the input type.
+     * @param string $baseClass
      * @return array{
      * option_name: string,
      * value: mixed,

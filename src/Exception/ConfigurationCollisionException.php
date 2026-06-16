@@ -11,4 +11,9 @@ declare(strict_types=1);
 
 namespace Modestox\ConfigProcessorWp\Exception;
 
+/**
+ * Class ConfigurationCollisionException
+ *
+ * Thrown when a duplicate configuration path or plugin identifier collision occurs.
+ */
 class ConfigurationCollisionException extends \Exception {}

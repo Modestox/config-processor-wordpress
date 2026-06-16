@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class MultiSelect
  *
- * Generates select input options mapping multiple stored parameters simultaneously.
+ * Renders multiple selection dropdown menus.
  */
 class MultiSelect extends AbstractField
 {
     /**
-     * Renders standard multiple entry selection tags.
+     * Renders standard multi-selection HTML markup.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData
@@ -29,8 +29,6 @@ class MultiSelect extends AbstractField
     {
         $attr = $this->prepareAttributes($fieldKey, $fieldData, 'regular-text');
         $options = (array)($fieldData['options'] ?? []);
-
-        // Stored arrays inside flat options are serialized or cast internally
         $selectedValues = is_array($attr['value']) ? $attr['value'] : (array)maybe_unserialize($attr['value']);
         ?>
         <select id="<?php echo esc_attr($attr['id']); ?>"
@@ -38,7 +36,8 @@ class MultiSelect extends AbstractField
                 class="<?php echo esc_attr($attr['classes']); ?>"
                 multiple="multiple" size="5">
             <?php foreach ($options as $value => $label): ?>
-                <option value="<?php echo esc_attr((string)$value); ?>" <?php selected(in_array((string)$value, $selectedValues, true)); ?>>
+                <?php $isSelected = in_array((string)$value, $selectedValues, true); ?>
+                <option value="<?php echo esc_attr((string)$value); ?>" <?php echo $isSelected ? 'selected="selected"' : ''; ?>>
                     <?php echo esc_html(trim((string)$label)); ?>
                 </option>
             <?php endforeach; ?>

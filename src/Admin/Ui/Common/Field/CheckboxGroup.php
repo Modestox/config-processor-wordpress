@@ -14,7 +14,7 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class CheckboxGroup
  *
- * Generates linear clusters of grouped input checkbox components.
+ * Renders grouped input checkbox lists.
  */
 class CheckboxGroup extends AbstractField
 {
@@ -37,7 +37,7 @@ class CheckboxGroup extends AbstractField
                     <input type="checkbox"
                            name="<?php echo esc_attr($attr['option_name']); ?>[]"
                            value="<?php echo esc_attr((string)$value); ?>"
-                        <?php checked(in_array((string)$value, $selectedValues, true)); ?> />
+                            <?php checked(in_array((string)$value, $selectedValues, true)); ?> />
                     <?php echo esc_html(trim((string)$label)); ?>
                 </label>
             <?php endforeach; ?>

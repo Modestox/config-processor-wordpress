@@ -14,8 +14,7 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\GlobalLayout;
 /**
  * Class TabNavigation
  *
- * Renders a two-level Magento-style sidebar navigation container matching tabs and sections.
- * Automatically suppresses empty tabs that do not possess nested section nodes.
+ * Renders sidebar navigation mapping tabs and assigned sections.
  */
 class TabNavigation
 {
@@ -31,11 +30,11 @@ class TabNavigation
             private readonly array $tabs,
             private readonly array $sections,
             private readonly string $activeSection,
-            private readonly string $pageSlug
+            private readonly string $pageSlug,
     ) {}
 
     /**
-     * Renders the master dynamic sidebar tree layout.
+     * Renders the sidebar navigation tree structure.
      *
      * @return void
      */
@@ -47,7 +46,7 @@ class TabNavigation
             <?php foreach ($this->tabs as $tabKey => $tabData):
                 $assignedSections = array_filter(
                         $this->sections,
-                        static fn(array $section) => ($section['tab'] ?? '') === $tabKey
+                        static fn(array $section) => ($section['tab'] ?? '') === $tabKey,
                 );
 
                 if (empty($assignedSections)) {

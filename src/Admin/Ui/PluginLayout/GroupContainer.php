@@ -1,6 +1,6 @@
 <?php
 /**
- * Modestox Config Processor Integration Wordpress 
+ * Modestox Config Processor Integration Wordpress
  *
  * @copyright Copyright (c) 2026 Sergey Kuzmitsky
  * @license   MIT
@@ -17,7 +17,7 @@ use Modestox\ConfigProcessorWp\Admin\OptionNameBuilder;
 /**
  * Class GroupContainer
  *
- * Handles rendering of visual layout group boxes inside the active section viewport.
+ * Renders configuration groups and fields for plugin standalone layouts.
  */
 class GroupContainer
 {
@@ -25,15 +25,15 @@ class GroupContainer
      * GroupContainer constructor.
      *
      * @param array<string, array<string, mixed>> $groups
-     * @param string $prefix Plugin standalone option prefix mapping value.
+     * @param string $prefix
      */
     public function __construct(
             private readonly array $groups,
-            private readonly string $prefix = ''
+            private readonly string $prefix = '',
     ) {}
 
     /**
-     * Renders group box components block.
+     * Renders plugin group tables layout.
      *
      * @return void
      */
@@ -47,7 +47,7 @@ class GroupContainer
                     $field['_option_name'] = OptionNameBuilder::build(
                             $this->prefix,
                             (string)$groupKey,
-                            (string)$fKey
+                            (string)$fKey,
                     );
                     $field['option_name'] = $field['_option_name'];
                 }

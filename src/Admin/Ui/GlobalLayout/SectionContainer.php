@@ -14,7 +14,7 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\GlobalLayout;
 /**
  * Class SectionContainer
  *
- * Manages rendering of outer architectural section nodes bound to the master DOM.
+ * Renders major page sections and coordinates their group child layouts.
  */
 class SectionContainer
 {
@@ -23,16 +23,16 @@ class SectionContainer
      *
      * @param array<string, array<string, mixed>> $sections
      * @param string $activeSection
-     * @param string $basePrefix Global system core prefix from the page settings layout parameters.
+     * @param string $basePrefix
      */
     public function __construct(
             private readonly array $sections,
             private readonly string $activeSection,
-            private readonly string $basePrefix
+            private readonly string $basePrefix,
     ) {}
 
     /**
-     * Iterates and compiles matching structural sections.
+     * Renders the active configuration section with its underlying group blocks.
      *
      * @return void
      */
@@ -53,7 +53,7 @@ class SectionContainer
             $wrapperClass .= ' ' . $customSectionClass;
         }
 
-        // Form the dynamic hierarchical namespace signature dynamically matching registration specs
+        // Build hierarchical layout namespace for input field persistence mapping
         $namespace = $this->basePrefix . '_' . $this->activeSection;
         ?>
         <div class="<?php echo esc_attr($wrapperClass); ?>">

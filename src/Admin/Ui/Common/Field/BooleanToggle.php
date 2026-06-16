@@ -14,12 +14,12 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class BooleanToggle
  *
- * Generates boolean checkbox toggle flags with fallback state assurance.
+ * Renders boolean checkbox toggle switches with fallback state handling.
  */
 class BooleanToggle extends AbstractField
 {
     /**
-     * Renders standard checkbox inputs matching true/false states perfectly.
+     * Renders standard checkbox inputs matching binary states.
      *
      * @param string $fieldKey
      * @param array<string, mixed> $fieldData

@@ -11,4 +11,9 @@ declare(strict_types=1);
 
 namespace Modestox\ConfigProcessorWp\Exception;
 
+/**
+ * Class OptionCollisionException
+ *
+ * Thrown when a unique option name collision is detected during field registration.
+ */
 class OptionCollisionException extends \Exception {}
