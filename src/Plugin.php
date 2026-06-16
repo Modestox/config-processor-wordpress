@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Modestox\ConfigProcessorWp;
 
 use Modestox\ConfigProcessorWp\Admin\PageRenderer;
+use Modestox\ConfigProcessorWp\Builder\ConfigMerger;
 use Modestox\ConfigProcessorWp\Exception\ConfigurationCollisionException;
 
 /**
@@ -22,7 +23,12 @@ use Modestox\ConfigProcessorWp\Exception\ConfigurationCollisionException;
 class Plugin
 {
     /**
-     * Internal storage for processed and validated configuration pages.
+     * Permanent single operational identifier slug for core global control panel.
+     */
+    private const GLOBAL_PAGE_SLUG = 'modestox_global_settings';
+
+    /**
+     * Internal storage for processed and validated configuration page tokens.
      *
      * @var array<string, array<string, mixed>>
      */
@@ -35,9 +41,7 @@ class Plugin
      */
     public function initialize(): void
     {
-        // Early initialization to ensure settings are registered for POST requests.
         add_action('init', [$this, 'bootConfiguration'], 5);
-
         add_action('admin_menu', [$this, 'registerAdminMenus'], 20);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminStyles']);
     }
@@ -49,18 +53,42 @@ class Plugin
      */
     public function bootConfiguration(): void
     {
-        /**
-         * Fetch configurations from two separate sources.
-         * We keep them separate to allow PageRenderer to apply different validation rules.
-         */
-        $globalConfigs = (array)apply_filters('modestox_register_admin_global_config', []);
+        // 1. Fetch simple structured arrays from modules: $configs['my_plugin'] = require ...
+        $rawGlobalFilters = (array)apply_filters('modestox_register_global_config', []);
+
+        try {
+            // Delegate complex merging and path checking to the proper core builder class
+            $globalSchema = ConfigMerger::mergeGlobalRegistry($rawGlobalFilters);
+        } catch (ConfigurationCollisionException $e) {
+            // Check if it is an administrative screen or an AJAX/REST request to prevent breaking APIs
+            if (is_admin() && (!defined('DOING_AJAX') || !DOING_AJAX)) {
+                wp_die(
+                    esc_html($e->getMessage()),
+                    'Modestox Config Error',
+                    ['response' => 500, 'back_link' => true]
+                );
+            }
+            return;
+        }
+
+        // Pack validated schema array into monolithic core page payload layout structure
+        $globalConfigs = [];
+        if (!empty($globalSchema['tabs']) || !empty($globalSchema['sections'])) {
+            $globalConfigs[self::GLOBAL_PAGE_SLUG] = [
+                'menu_title' => 'Modestox Global Settings',
+                'capability' => 'manage_options',
+                'icon'       => 'dashicons-admin-settings',
+                'schema'     => $globalSchema,
+            ];
+        }
+
+        // 2. Fetch standard local flat plugin settings
         $pluginConfigs = (array)apply_filters('modestox_register_admin_plugin_config', []);
 
-        // Save active page slugs to internal storage so scripts can be enqueued conditionally
+        // Cache unified pages nodes state
         $this->configPages = array_merge($globalConfigs, $pluginConfigs);
 
         if (is_admin() && (!empty($globalConfigs) || !empty($pluginConfigs))) {
-            // Pass both sets to PageRenderer to handle them accordingly
             new PageRenderer($globalConfigs, $pluginConfigs);
         }
     }
@@ -72,30 +100,29 @@ class Plugin
      */
     public function registerAdminMenus(): void
     {
-        // Fetch both registries
-        $globalConfigs = (array)apply_filters('modestox_register_admin_global_config', []);
-        $pluginConfigs = (array)apply_filters('modestox_register_admin_plugin_config', []);
+        if (empty($this->configPages)) {
+            return;
+        }
 
-        // Register Global Menus
-        foreach ($globalConfigs as $pageSlug => $pageData) {
-            $menuTitle = (string)($pageData['menu_title'] ?? 'Global Options');
-            $capability = (string)($pageData['capability'] ?? 'manage_options');
-            $menuIcon = (string)($pageData['icon'] ?? '');
-
+        if (isset($this->configPages[self::GLOBAL_PAGE_SLUG])) {
+            $globalPage = $this->configPages[self::GLOBAL_PAGE_SLUG];
             add_menu_page(
-                $menuTitle,
-                $menuTitle,
-                $capability,
-                $pageSlug,
+                (string)$globalPage['menu_title'],
+                (string)$globalPage['menu_title'],
+                (string)$globalPage['capability'],
+                self::GLOBAL_PAGE_SLUG,
                 [$this, 'renderPageContainer'],
-                $menuIcon,
+                (string)$globalPage['icon']
             );
         }
 
-        // Register Plugin Menus
-        foreach ($pluginConfigs as $pageSlug => $pageData) {
+        foreach ($this->configPages as $pageSlug => $pageData) {
+            if ($pageSlug === self::GLOBAL_PAGE_SLUG) {
+                continue;
+            }
+
             $parentSlug = (string)($pageData['parent_slug'] ?? 'options-general.php');
-            $menuTitle = (string)($pageData['menu_title'] ?? 'Plugin Options');
+            $menuTitle  = (string)($pageData['menu_title'] ?? 'Plugin Options');
             $capability = (string)($pageData['capability'] ?? 'manage_options');
 
             add_submenu_page(
@@ -104,7 +131,7 @@ class Plugin
                 $menuTitle,
                 $capability,
                 $pageSlug,
-                [$this, 'renderPageContainer'],
+                [$this, 'renderPageContainer']
             );
         }
     }
@@ -121,18 +148,14 @@ class Plugin
             if (str_contains($hookSuffix, $pageSlug)) {
                 $basePath = dirname(__DIR__) . '/modestox-config-processor-wp.php';
 
-                // Enqueue WordPress native media manager core assets
                 wp_enqueue_media();
 
-                // Enqueue Stylesheet asset framework
                 $cssUrl = plugins_url('assets/css/admin-settings.css', $basePath);
                 wp_enqueue_style('modestox-admin-settings', $cssUrl, [], '1.0.0');
 
-                // Enqueue JavaScript operational engine component layout nodes
                 $jsUrl = plugins_url('assets/js/admin-fields.js', $basePath);
                 wp_enqueue_script('modestox-admin-fields', $jsUrl, [], '1.0.0', true);
 
-                // Enqueue Additional JavaScript asset component (e.g., depends-engine or custom logic)
                 $customJsUrl = plugins_url('assets/js/admin-depends.js', $basePath);
                 wp_enqueue_script('modestox-admin-depends', $customJsUrl, ['modestox-admin-fields'], '1.0.0', true);
                 break;
@@ -142,18 +165,19 @@ class Plugin
 
     /**
      * Master rendering route container.
-     * Fetches registries dynamically and instantiates the renderer with required dependencies.
      *
      * @return void
-     * @throws ConfigurationCollisionException
      */
     public function renderPageContainer(): void
     {
-        // Fetch both registries again, as this method runs in a fresh execution context
-        $globalConfigs = (array)apply_filters('modestox_register_admin_global_config', []);
-        $pluginConfigs = (array)apply_filters('modestox_register_admin_plugin_config', []);
+        $globalConfigs = [];
+        if (isset($this->configPages[self::GLOBAL_PAGE_SLUG])) {
+            $globalConfigs[self::GLOBAL_PAGE_SLUG] = $this->configPages[self::GLOBAL_PAGE_SLUG];
+        }
 
-        // Pass both arguments to satisfy the PageRenderer constructor
+        $pluginConfigs = $this->configPages;
+        unset($pluginConfigs[self::GLOBAL_PAGE_SLUG]);
+
         (new PageRenderer($globalConfigs, $pluginConfigs))->render();
     }
 }
