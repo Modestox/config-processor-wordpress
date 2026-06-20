@@ -1,5 +1,5 @@
 {
-  "name": "modestox/config-processor-wordpress",
+  "name": "modestox/modestox-config-processor-wp",
   "description": "WordPress integration plugin for Modestox Config Processor",
   "homepage": "https://github.com/Modestox/config-processor-wordpress",
   "type": "wordpress-plugin",
