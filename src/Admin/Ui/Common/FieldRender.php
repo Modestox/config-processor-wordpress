@@ -92,7 +92,7 @@ class FieldRender
     private function renderTableRow(string $key, array $data): void
     {
         $label = (string)($data['label'] ?? $key);
-        $optionName = (string)($data['_option_name'] ?? ('mtx_sys_config_' . $key));
+        $optionName = (string)($data['_option_name'] ?? ('mtx_' . $key));
         $uniqueId = 'config_' . $optionName;
 
         $dependsData = isset($data['depends']) ? json_encode($data['depends'], JSON_UNESCAPED_SLASHES) : '';
@@ -126,7 +126,7 @@ class FieldRender
     private function renderDivRow(string $key, array $data): void
     {
         $label = (string)($data['label'] ?? $key);
-        $optionName = (string)($data['_option_name'] ?? ('mtx_sys_config_' . $key));
+        $optionName = (string)($data['_option_name'] ?? ('mtx_' . $key));
         $uniqueId = 'config_' . $optionName;
 
         $dependsData = isset($data['depends']) ? json_encode($data['depends'], JSON_UNESCAPED_SLASHES) : '';

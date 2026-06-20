@@ -56,7 +56,7 @@ abstract class AbstractField
      */
     protected function prepareAttributes(string $fieldKey, array $fieldData, string $baseClass = 'regular-text'): array
     {
-        $optionName = (string)($fieldData['_option_name'] ?? ('mtx_sys_config_' . $fieldKey));
+        $optionName = (string)($fieldData['_option_name'] ?? ('mtx_' . $fieldKey));
         $defaultValue = $fieldData['default'] ?? '';
 
         $customClass = (string)($fieldData['class'] ?? '');

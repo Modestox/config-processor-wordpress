@@ -117,7 +117,7 @@ final class Plugin
         $globalConfigs = [];
         if (!empty($globalSchema['tabs']) || !empty($globalSchema['sections'])) {
             $globalConfigs[self::GLOBAL_PAGE_SLUG] = [
-                'menu_title' => 'Modestox Global Settings',
+                'menu_title' => esc_html__('Global Settings', 'modestox-config-processor-wp'),
                 'capability' => 'manage_options',
                 'icon'       => 'dashicons-admin-settings',
                 'schema'     => $globalSchema,
@@ -136,10 +136,10 @@ final class Plugin
             }
 
             $pluginSlug = (string)($pluginPayload['plugin'] ?? '');
-            $pageSlug = (string)($pluginPayload['page'] ?? '');
-            $pageData = $pluginPayload['data'] ?? null;
+            $pageSlug = (string)($pluginPayload['page_slug'] ?? '');
+            $schema = $pluginPayload['schema'] ?? null;
 
-            if ($pluginSlug === '' || $pageSlug === '' || !is_array($pageData)) {
+            if ($pluginSlug === '' || $pageSlug === '' || !is_array($schema)) {
                 continue;
             }
 
@@ -169,7 +169,14 @@ final class Plugin
 
             $registeredPluginSlugsMap[$pluginSlug] = true;
             $registeredPagesMap[$pageSlug] = true;
-            $pluginConfigs[$pageSlug] = $pageData;
+
+            $pluginConfigs[$pageSlug] = [
+                'parent_slug'   => (string)($pluginPayload['parent_slug'] ?? 'options-general.php'),
+                'menu_title'    => (string)($pluginPayload['menu_title'] ?? esc_html__('Plugin Options', 'modestox-config-processor-wp')),
+                'capability'    => (string)($pluginPayload['capability'] ?? 'manage_options'),
+                'option_prefix' => (string)($pluginPayload['option_prefix'] ?? $pluginSlug),
+                'schema'        => $schema,
+            ];
         }
 
         // Cache unified pages nodes state securely
@@ -244,7 +251,7 @@ final class Plugin
                 wp_enqueue_script('modestox-admin-fields', $jsUrl, [], '1.0.0', true);
 
                 wp_localize_script('modestox-admin-fields', 'mtxConfigData', [
-                    'siteName' => get_bloginfo('name')
+                    'siteName' => get_bloginfo('name'),
                 ]);
 
                 $customJsUrl = plugins_url('assets/js/admin-depends.js', $basePath);

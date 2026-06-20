@@ -82,8 +82,7 @@ class Builder
     private function renderGlobalLayout(): void
     {
         $pageData = (array)($this->pageParams[0] ?? []);
-        $prefix = (string)($pageData['option_prefix'] ?? '');
-        $basePrefix = $prefix !== '' ? $prefix : 'mtx_sys_config';
+        $basePrefix = 'mtx';
 
         $sections = (array)($this->schema['sections'] ?? []);
         if (empty($sections)) {

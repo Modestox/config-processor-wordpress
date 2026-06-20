@@ -31,15 +31,14 @@ class DynamicRows extends AbstractField
         $columns = (array)($fieldData['columns'] ?? []);
         $rows = is_array($attr['value']) ? $attr['value'] : (array)maybe_unserialize($attr['value']);
         ?>
-        <div class="mtx-dynamic-rows-container" style="max-width: 650px;">
-            <table id="<?php echo esc_attr($attr['id']); ?>" class="widefat striped <?php echo esc_attr($attr['classes']); ?>"
-                   style="margin-top:10px;">
+        <div class="mtx-dynamic-rows-container">
+            <table id="<?php echo esc_attr($attr['id']); ?>" class="widefat striped <?php echo esc_attr($attr['classes']); ?>">
                 <thead>
                 <tr>
                     <?php foreach ($columns as $colLabel): ?>
                         <th><?php echo esc_html(trim((string)$colLabel)); ?></th>
                     <?php endforeach; ?>
-                    <th style="width: 40px; text-align: center;"><?php echo esc_html__('Actions', 'modestox-config-processor-wp'); ?></th>
+                    <th class="mtx-actions-column"><?php echo esc_html__('Actions', 'modestox-config-processor-wp'); ?></th>
                 </tr>
                 </thead>
                 <tbody class="mtx-dynamic-rows-body">
@@ -48,18 +47,15 @@ class DynamicRows extends AbstractField
                         <?php foreach (array_keys($columns) as $colKey): ?>
                             <td>
                                 <input type="text"
-                                       name="<?php echo esc_attr($attr['option_name']); ?>[<?php echo (int)$index; ?>][<?php echo esc_attr(
-                                               $colKey,
-                                       ); ?>]"
+                                       name="<?php echo esc_attr($attr['option_name']); ?>[<?php echo (int)$index; ?>][<?php echo esc_attr($colKey); ?>]"
                                        value="<?php echo esc_attr((string)($rowValues[$colKey] ?? '')); ?>"
-                                       class="regular-text" style="width:100%;"/>
+                                       class="regular-text"/>
                             </td>
                         <?php endforeach; ?>
-                        <td style="text-align: center; vertical-align: middle;">
+                        <td class="mtx-action-cell">
                             <button type="button" class="button mtx-remove-row-btn"
-                                    title="<?php echo esc_attr__('Remove row', 'modestox-config-processor-wp'); ?>"
-                                    style="color: #b32d2e; border-color: #b32d2e;">
-                                <span class="dashicons dashicons-no-alt" style="vertical-align: middle; margin-top: -2px;"></span>
+                                    title="<?php echo esc_attr__('Remove row', 'modestox-config-processor-wp'); ?>">
+                                <span class="dashicons dashicons-no-alt"></span>
                             </button>
                         </td>
                     </tr>
@@ -69,14 +65,13 @@ class DynamicRows extends AbstractField
                             <td>
                                 <input type="text"
                                        name="<?php echo esc_attr($attr['option_name']); ?>[0][<?php echo esc_attr($colKey); ?>]"
-                                       value="" class="regular-text" style="width:100%;"/>
+                                       value="" class="regular-text"/>
                             </td>
                         <?php endforeach; ?>
-                        <td style="text-align: center; vertical-align: middle;">
+                        <td class="mtx-action-cell">
                             <button type="button" class="button mtx-remove-row-btn"
-                                    title="<?php echo esc_attr__('Remove row', 'modestox-config-processor-wp'); ?>"
-                                    style="color: #b32d2e; border-color: #b32d2e;">
-                                <span class="dashicons dashicons-no-alt" style="vertical-align: middle; margin-top: -2px;"></span>
+                                    title="<?php echo esc_attr__('Remove row', 'modestox-config-processor-wp'); ?>">
+                                <span class="dashicons dashicons-no-alt"></span>
                             </button>
                         </td>
                     </tr>
@@ -84,9 +79,9 @@ class DynamicRows extends AbstractField
                 </tbody>
             </table>
 
-            <div style="margin-top: 10px; text-align: right;">
+            <div class="mtx-dynamic-rows-actions">
                 <button type="button" class="button button-secondary mtx-add-row-btn" data-table="<?php echo esc_attr($attr['id']); ?>">
-                    <span class="dashicons dashicons-plus" style="vertical-align: middle; margin-top: -2px;"></span>
+                    <span class="dashicons dashicons-plus"></span>
                     <?php echo esc_html__('Add Row', 'modestox-config-processor-wp'); ?>
                 </button>
             </div>
@@ -97,14 +92,13 @@ class DynamicRows extends AbstractField
                         <td>
                             <input type="text"
                                    name="<?php echo esc_attr($attr['option_name']); ?>[{{index}}][<?php echo esc_attr($colKey); ?>]"
-                                   value="" class="regular-text" style="width:100%;"/>
+                                   value="" class="regular-text"/>
                         </td>
                     <?php endforeach; ?>
-                    <td style="text-align: center; vertical-align: middle;">
+                    <td class="mtx-action-cell">
                         <button type="button" class="button mtx-remove-row-btn"
-                                title="<?php echo esc_attr__('Remove row', 'modestox-config-processor-wp'); ?>"
-                                style="color: #b32d2e; border-color: #b32d2e;">
-                            <span class="dashicons dashicons-no-alt" style="vertical-align: middle; margin-top: -2px;"></span>
+                                title="<?php echo esc_attr__('Remove row', 'modestox-config-processor-wp'); ?>">
+                            <span class="dashicons dashicons-no-alt"></span>
                         </button>
                     </td>
                 </tr>

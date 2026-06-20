@@ -67,7 +67,7 @@ class PageRenderer
 
         foreach ($this->allConfigs as $pageSlug => $pageData) {
             $prefix = isset($pageData['option_prefix']) ? $this->sanitizePrefix($pageData['option_prefix']) : '';
-            $basePrefix = $prefix !== '' ? $prefix : 'mtx_sys_config';
+            $basePrefix = $prefix !== '' ? $prefix : 'mtx';
             $schema = (array)($pageData['schema'] ?? []);
 
             if (isset($schema['sections'])) {

@@ -14,11 +14,16 @@
   "require": {
     "php": ">=8.3",
     "composer/installers": "^2.0",
-    "modestox/config-processor": "^1.0"
+    "modestox/config-processor": "^1.0.1"
   },
   "autoload": {
     "psr-4": {
       "Modestox\\ConfigProcessorWp\\": "src/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true
     }
   }
 }
