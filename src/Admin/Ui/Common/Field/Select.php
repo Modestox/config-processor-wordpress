@@ -32,7 +32,8 @@ class Select extends AbstractField
         ?>
         <select id="<?php echo esc_attr($attr['id']); ?>"
                 name="<?php echo esc_attr($attr['option_name']); ?>"
-                class="<?php echo esc_attr($attr['classes']); ?>">
+                class="<?php echo esc_attr($attr['classes']); ?>"
+                <?php echo $attr['required_attr']; ?>>
             <?php foreach ($options as $value => $label): ?>
                 <option value="<?php echo esc_attr((string)$value); ?>" <?php selected($attr['value'], (string)$value); ?>>
                     <?php echo esc_html(trim((string)$label)); ?>

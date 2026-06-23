@@ -36,7 +36,8 @@ class Radio extends AbstractField
                     <input type="radio"
                            name="<?php echo esc_attr($attr['option_name']); ?>"
                            value="<?php echo esc_attr((string)$value); ?>"
-                            <?php checked($attr['value'], (string)$value); ?> />
+                            <?php checked($attr['value'], (string)$value); ?>
+                            <?php echo $attr['required_attr']; ?> />
                     <?php echo esc_html(trim((string)$label)); ?>
                 </label>
             <?php endforeach; ?>

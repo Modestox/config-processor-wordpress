@@ -34,7 +34,8 @@ class MultiSelect extends AbstractField
         <select id="<?php echo esc_attr($attr['id']); ?>"
                 name="<?php echo esc_attr($attr['option_name']); ?>[]"
                 class="<?php echo esc_attr($attr['classes']); ?>"
-                multiple="multiple" size="5">
+                multiple="multiple" size="5"
+                <?php echo $attr['required_attr']; ?>>
             <?php foreach ($options as $value => $label): ?>
                 <?php $isSelected = in_array((string)$value, $selectedValues, true); ?>
                 <option value="<?php echo esc_attr((string)$value); ?>" <?php echo $isSelected ? 'selected="selected"' : ''; ?>>

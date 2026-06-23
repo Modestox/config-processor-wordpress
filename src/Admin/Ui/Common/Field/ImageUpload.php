@@ -38,6 +38,15 @@ class ImageUpload extends AbstractField
                    value="<?php echo esc_attr($imageUrl); ?>"
                    class="mtx-image-value-target"/>
 
+            <?php if ($attr['required_attr'] !== ''): ?>
+                <input type="text"
+                       class="mtx-image-value-target"
+                       value="<?php echo esc_attr($imageUrl); ?>"
+                       style="position:absolute; width:0; height:0; opacity:0; pointer-events:none; padding:0; border:none;"
+                        <?php echo $attr['required_attr']; ?>
+                       tabindex="-1" />
+            <?php endif; ?>
+
             <div class="mtx-media-preview-box" style="<?php echo $hasImage ? '' : 'display: none;'; ?>">
                 <div class="mtx-preview-browser-mockup">
                     <img src="<?php echo esc_url($imageUrl); ?>" class="mtx-preview-image-node"

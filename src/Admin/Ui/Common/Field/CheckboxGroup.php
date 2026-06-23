@@ -37,7 +37,8 @@ class CheckboxGroup extends AbstractField
                     <input type="checkbox"
                            name="<?php echo esc_attr($attr['option_name']); ?>[]"
                            value="<?php echo esc_attr((string)$value); ?>"
-                            <?php checked(in_array((string)$value, $selectedValues, true)); ?> />
+                            <?php checked(in_array((string)$value, $selectedValues, true)); ?>
+                            <?php echo $attr['required_attr']; ?> />
                     <?php echo esc_html(trim((string)$label)); ?>
                 </label>
             <?php endforeach; ?>

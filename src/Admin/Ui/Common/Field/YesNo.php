@@ -32,7 +32,8 @@ class YesNo extends AbstractField
         ?>
         <select id="<?php echo esc_attr($attr['id']); ?>"
                 name="<?php echo esc_attr($attr['option_name']); ?>"
-                class="<?php echo esc_attr($attr['classes']); ?>">
+                class="<?php echo esc_attr($attr['classes']); ?>"
+                <?php echo $attr['required_attr']; ?>>
             <option value="1" <?php selected($selectedValue, 1); ?>><?php echo esc_html__('Yes', 'modestox-config-processor-wp'); ?></option>
             <option value="0" <?php selected($selectedValue, 0); ?>><?php echo esc_html__('No', 'modestox-config-processor-wp'); ?></option>
         </select>

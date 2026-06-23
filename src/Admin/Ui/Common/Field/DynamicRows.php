@@ -47,9 +47,12 @@ class DynamicRows extends AbstractField
                         <?php foreach (array_keys($columns) as $colKey): ?>
                             <td>
                                 <input type="text"
-                                       name="<?php echo esc_attr($attr['option_name']); ?>[<?php echo (int)$index; ?>][<?php echo esc_attr($colKey); ?>]"
+                                       name="<?php echo esc_attr($attr['option_name']); ?>[<?php echo (int)$index; ?>][<?php echo esc_attr(
+                                               $colKey,
+                                       ); ?>]"
                                        value="<?php echo esc_attr((string)($rowValues[$colKey] ?? '')); ?>"
-                                       class="regular-text"/>
+                                       class="regular-text"
+                                        <?php echo $attr['required_attr']; ?>/>
                             </td>
                         <?php endforeach; ?>
                         <td class="mtx-action-cell">
@@ -65,7 +68,8 @@ class DynamicRows extends AbstractField
                             <td>
                                 <input type="text"
                                        name="<?php echo esc_attr($attr['option_name']); ?>[0][<?php echo esc_attr($colKey); ?>]"
-                                       value="" class="regular-text"/>
+                                       value="" class="regular-text"
+                                        <?php echo $attr['required_attr']; ?>/>
                             </td>
                         <?php endforeach; ?>
                         <td class="mtx-action-cell">
@@ -92,7 +96,8 @@ class DynamicRows extends AbstractField
                         <td>
                             <input type="text"
                                    name="<?php echo esc_attr($attr['option_name']); ?>[{{index}}][<?php echo esc_attr($colKey); ?>]"
-                                   value="" class="regular-text"/>
+                                   value="" class="regular-text"
+                                    <?php echo $attr['required_attr']; ?>/>
                         </td>
                     <?php endforeach; ?>
                     <td class="mtx-action-cell">

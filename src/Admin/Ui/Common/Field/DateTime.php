@@ -49,11 +49,11 @@ class DateTime extends AbstractField
                id="<?php echo esc_attr($attr['id']); ?>"
                name="<?php echo esc_attr($attr['option_name']); ?>"
                class="<?php echo esc_attr($attr['classes']); ?>"
-               value="<?php echo esc_attr($value); ?>" />
-
+               value="<?php echo esc_attr($value); ?>"
+                <?php echo $attr['required_attr']; ?> />
         <?php if ($attr['comment'] !== ''): ?>
-        <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>
-    <?php endif; ?>
+            <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>
+        <?php endif; ?>
         <?php
     }
 

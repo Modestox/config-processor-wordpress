@@ -34,7 +34,8 @@ class Text extends AbstractField
                name="<?php echo esc_attr($attr['option_name']); ?>"
                class="<?php echo esc_attr($attr['classes']); ?>"
                placeholder="<?php echo esc_attr($attr['placeholder']); ?>"
-               value="<?php echo esc_attr($attr['value']); ?>"/>
+               value="<?php echo esc_attr($attr['value']); ?>"
+                <?php echo $attr['required_attr']; ?>/>
 
         <?php if ($attr['comment'] !== ''): ?>
         <p class="mtx-config-field-comment">

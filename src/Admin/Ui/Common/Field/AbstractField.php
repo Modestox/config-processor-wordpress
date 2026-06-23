@@ -51,6 +51,7 @@ abstract class AbstractField
      * comment: string,
      * placeholder: string,
      * classes: string,
+     * required_attr: string,
      * id: string
      * }
      */
@@ -78,13 +79,17 @@ abstract class AbstractField
             ? 'crud_' . $optionName
             : 'config_' . $optionName;
 
+        $requiredRaw = $fieldData['required'] ?? false;
+        $requiredAttr = $requiredRaw ? ' required="required"' : '';
+
         return [
-            'option_name' => $optionName,
-            'value'       => $rawValue,
-            'comment'     => (string)($fieldData['comment'] ?? ''),
-            'placeholder' => (string)($fieldData['placeholder'] ?? ''),
-            'classes'     => $inputClasses,
-            'id'          => $idAttr,
+            'option_name'   => $optionName,
+            'value'         => $rawValue,
+            'comment'       => (string)($fieldData['comment'] ?? ''),
+            'placeholder'   => (string)($fieldData['placeholder'] ?? ''),
+            'classes'       => $inputClasses,
+            'required_attr' => $requiredAttr,
+            'id'            => $idAttr,
         ];
     }
 }

@@ -38,7 +38,8 @@ class BooleanToggle extends AbstractField
                        name="<?php echo esc_attr($attr['option_name']); ?>"
                        class="<?php echo esc_attr($attr['classes']); ?>"
                        value="1"
-                        <?php checked($checked); ?> />
+                        <?php checked($checked); ?>
+                        <?php echo $attr['required_attr']; ?> />
                 <?php if ($attr['comment'] !== ''): ?>
                     <span class="description"><?php echo esc_html($attr['comment']); ?></span>
                 <?php endif; ?>

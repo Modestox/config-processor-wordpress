@@ -33,8 +33,8 @@ class Textarea extends AbstractField
                   name="<?php echo esc_attr($attr['option_name']); ?>"
                   class="<?php echo esc_attr($attr['classes']); ?>"
                   placeholder="<?php echo esc_attr($attr['placeholder']); ?>"
-                  rows="5" cols="50"><?php echo esc_html($attr['value']); ?></textarea>
-
+                  rows="5" cols="50"
+                  <?php echo $attr['required_attr']; ?>><?php echo esc_html($attr['value']); ?></textarea>
         <?php if ($attr['comment'] !== ''): ?>
         <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>
     <?php endif; ?>
