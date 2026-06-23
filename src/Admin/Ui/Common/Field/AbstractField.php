@@ -56,7 +56,10 @@ abstract class AbstractField
      */
     protected function prepareAttributes(string $fieldKey, array $fieldData, string $baseClass = 'regular-text'): array
     {
-        $optionName = (string)($fieldData['_option_name'] ?? ('mtx_' . $fieldKey));
+        $optionName = array_key_exists('_forced_name', $fieldData)
+            ? (string)$fieldData['_forced_name']
+            : (string)($fieldData['_option_name'] ?? ('mtx_' . $fieldKey));
+
         $defaultValue = $fieldData['default'] ?? '';
 
         $customClass = (string)($fieldData['class'] ?? '');
@@ -65,7 +68,15 @@ abstract class AbstractField
             $inputClasses .= ' ' . $customClass;
         }
 
-        $rawValue = get_option($optionName, $defaultValue);
+        if (array_key_exists('_forced_value', $fieldData)) {
+            $rawValue = $fieldData['_forced_value'];
+        } else {
+            $rawValue = get_option($optionName, $defaultValue);
+        }
+
+        $idAttr = array_key_exists('_forced_name', $fieldData)
+            ? 'crud_' . $optionName
+            : 'config_' . $optionName;
 
         return [
             'option_name' => $optionName,
@@ -73,7 +84,7 @@ abstract class AbstractField
             'comment'     => (string)($fieldData['comment'] ?? ''),
             'placeholder' => (string)($fieldData['placeholder'] ?? ''),
             'classes'     => $inputClasses,
-            'id'          => 'config_' . $optionName,
+            'id'          => $idAttr,
         ];
     }
 }
