@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace Modestox\ConfigProcessorWp\Admin;
 
 use Modestox\ConfigProcessorWp\Admin\Ui\Builder;
-use Modestox\ConfigProcessorWp\Plugin;
 use Modestox\ConfigProcessorWp\Registry\ConfigRegistry;
 
 /**
@@ -31,7 +30,7 @@ final class AdminPages
 
     public function __construct(
         private readonly ConfigRegistry $registry,
-        private readonly string $pluginFile,
+        private readonly Assets $assets,
     ) {}
 
     /**
@@ -64,12 +63,7 @@ final class AdminPages
             return;
         }
 
-        $baseUrl = plugin_dir_url($this->pluginFile);
-
-        wp_enqueue_media();
-        wp_enqueue_style('modestox-admin-settings', $baseUrl . 'assets/css/admin-settings.css', [], Plugin::VERSION);
-        wp_enqueue_script('modestox-admin-fields', $baseUrl . 'assets/js/admin-fields.js', [], Plugin::VERSION, true);
-        wp_enqueue_script('modestox-admin-depends', $baseUrl . 'assets/js/admin-depends.js', [], Plugin::VERSION, true);
+        $this->assets->enqueue();
     }
 
     /**

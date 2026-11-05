@@ -14,6 +14,7 @@ namespace Modestox\ConfigProcessorWp\Field;
 use LogicException;
 use Modestox\ConfigProcessor\Schema\GroupedConfig;
 use Modestox\ConfigProcessor\Schema\SystemConfig;
+use Modestox\ConfigProcessor\Validator\SystemConfig\Fields;
 use Modestox\ConfigProcessor\Validator\SystemConfig\Fields\FieldValidatorInterface;
 use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\AbstractField;
 use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\BooleanToggle;
@@ -157,6 +158,16 @@ final class FieldTypeRegistry
     public function systemSchema(): SystemConfig
     {
         return $this->validators === [] ? new SystemConfig() : SystemConfig::withFieldTypes($this->validators);
+    }
+
+    /**
+     * Validator of a fields array (one group), with the custom types. Used for fields outside a schema.
+     *
+     * @return Fields
+     */
+    public function fieldsValidator(): Fields
+    {
+        return new Fields($this->validators);
     }
 
     /**

@@ -321,3 +321,9 @@
     line-height: 30px;
     color: #8c8f94;
 }
+
+
+/* Required marker of FieldView::renderRow() */
+.mtx-field-row .required {
+    color: #d63638;
+}

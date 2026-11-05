@@ -15,14 +15,20 @@
     // ----- Dynamic rows -----------------------------------------------------------------------
 
     /**
-     * Rewrites the row index in the input names: option[3][column] -> option[0][column].
+     * Rewrites the row index in the input names: option[3][column] -> option[0][column],
+     * note[links][3][column] -> note[links][0][column].
      *
      * @param {HTMLElement} tbody
      */
     const reindexRows = (tbody) => {
+        const base = tbody.dataset.mtxName || '';
         tbody.querySelectorAll('.mtx-dynamic-row').forEach((row, index) => {
             row.querySelectorAll('input[name]').forEach((input) => {
-                input.setAttribute('name', input.getAttribute('name').replace(/\[[^\]]*\]/, `[${index}]`));
+                const name = input.getAttribute('name');
+                const updated = base !== '' && name.startsWith(base + '[')
+                    ? base + name.slice(base.length).replace(/^\[[^\]]*\]/, `[${index}]`)
+                    : name.replace(/\[[^\]]*\]/, `[${index}]`);
+                input.setAttribute('name', updated);
             });
         });
     };

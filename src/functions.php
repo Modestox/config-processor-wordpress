@@ -39,3 +39,30 @@ if (!function_exists('modestox_config')) {
         return Plugin::instance()->registry()->value($plugin, $path);
     }
 }
+
+if (!function_exists('modestox_fields')) {
+    /**
+     * Field rendering for your own forms (CRUD screens, meta boxes, custom admin pages).
+     *
+     *     $ui = modestox_fields();
+     *     if ($ui !== null) {
+     *         $field = $ui->field('text', 'title', ['label' => 'Title', 'required' => true]);
+     *         $field->renderRow($note['title'] ?? null);
+     *     }
+     *
+     * @return \Modestox\ConfigProcessorWp\Api\FormFields|null Null when the adapter is not active or 'init' has not run yet.
+     */
+    function modestox_fields(): ?\Modestox\ConfigProcessorWp\Api\FormFields
+    {
+        if (!class_exists(Plugin::class) || !Plugin::instance()->isBooted()) {
+            return null;
+        }
+
+        if (!did_action('init')) {
+            _doing_it_wrong('modestox_fields', 'Fields are available from the "init" action on.', Plugin::VERSION);
+            return null;
+        }
+
+        return Plugin::instance()->fields();
+    }
+}

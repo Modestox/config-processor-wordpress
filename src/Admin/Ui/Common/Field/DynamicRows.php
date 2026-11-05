@@ -56,7 +56,7 @@ class DynamicRows extends AbstractField
                     <th class="mtx-actions-column"><?php echo esc_html__('Actions', 'modestox-config-processor-wp'); ?></th>
                 </tr>
                 </thead>
-                <tbody class="mtx-dynamic-rows-body">
+                <tbody class="mtx-dynamic-rows-body" data-mtx-name="<?php echo esc_attr($optionName); ?>">
                 <?php foreach ($rows as $index => $row):
                     $row = is_array($row) ? $row : [];
                     $isLocked = $lockedColumn !== null && isset($lockedKeys[(string)($row[$lockedColumn] ?? '')]);

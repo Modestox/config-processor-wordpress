@@ -137,12 +137,15 @@ abstract class AbstractField
     }
 
     /**
+     * HTML id for an input name. Option names stay as they are; other characters (e.g. brackets
+     * of 'note[title]') become '_', so the id is safe for labels, CSS and getElementById().
+     *
      * @param string $optionName
      * @return string
      */
     public function inputId(string $optionName): string
     {
-        return 'mtx-field-' . $optionName;
+        return 'mtx-field-' . preg_replace('/[^A-Za-z0-9_-]/', '_', $optionName);
     }
 
     /**

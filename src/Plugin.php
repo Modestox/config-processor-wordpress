@@ -13,8 +13,10 @@ namespace Modestox\ConfigProcessorWp;
 
 use LogicException;
 use Modestox\ConfigProcessorWp\Admin\AdminPages;
+use Modestox\ConfigProcessorWp\Admin\Assets;
 use Modestox\ConfigProcessorWp\Admin\Notices;
 use Modestox\ConfigProcessorWp\Admin\SettingsRegistrar;
+use Modestox\ConfigProcessorWp\Api\FormFields;
 use Modestox\ConfigProcessorWp\Registry\ConfigRegistry;
 
 /**
@@ -24,7 +26,7 @@ use Modestox\ConfigProcessorWp\Registry\ConfigRegistry;
  */
 final class Plugin
 {
-    public const VERSION = '1.1.0';
+    public const VERSION = '1.0.0';
     public const TEXT_DOMAIN = 'modestox-config-processor-wp';
 
     private static ?self $instance = null;
@@ -32,6 +34,10 @@ final class Plugin
     private string $pluginFile = '';
 
     private ?ConfigRegistry $registry = null;
+
+    private ?Assets $assets = null;
+
+    private ?FormFields $fields = null;
 
     private function __construct() {}
 
@@ -59,6 +65,7 @@ final class Plugin
 
         $this->pluginFile = $pluginFile;
         $this->registry = new ConfigRegistry();
+        $this->assets = new Assets($pluginFile);
 
         add_action('init', [$this, 'loadTextDomain'], 0);
 
@@ -66,7 +73,9 @@ final class Plugin
         add_action('init', [new SettingsRegistrar($this->registry), 'register'], 20);
 
         if (is_admin()) {
-            $pages = new AdminPages($this->registry, $pluginFile);
+            add_action('admin_enqueue_scripts', [$this->assets, 'register'], 0);
+
+            $pages = new AdminPages($this->registry, $this->assets);
             add_action('admin_menu', [$pages, 'register'], 20);
             add_action('admin_enqueue_scripts', [$pages, 'enqueueAssets']);
             add_action('admin_notices', [new Notices($this->registry), 'render']);
@@ -91,6 +100,20 @@ final class Plugin
         }
 
         return $this->registry;
+    }
+
+    /**
+     * Field rendering for other plugins' own forms; see modestox_fields().
+     *
+     * @return FormFields
+     */
+    public function fields(): FormFields
+    {
+        if ($this->registry === null || $this->assets === null) {
+            throw new LogicException('The Modestox Config Processor adapter has not been booted yet.');
+        }
+
+        return $this->fields ??= new FormFields($this->registry->types(), $this->assets);
     }
 
     /**

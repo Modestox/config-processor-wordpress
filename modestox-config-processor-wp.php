@@ -10,7 +10,7 @@
 /**
  * Plugin Name:       Modestox Config Processor Integration Wordpress
  * Description:       Builds WordPress admin settings pages from declarative arrays validated by Modestox Config Processor.
- * Version:           1.1.0
+ * Version:           1.0.0
  * Requires at least: 6.4
  * Requires PHP:      8.3
  * Author:            Sergey Kuzmitsky
