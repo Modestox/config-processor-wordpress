@@ -46,14 +46,34 @@ Das Beschreibungsmodell ist dasselbe wie bei `system.xml` in Magento: **Tabs →
 
 ## Installation
 
+### Mit Composer (empfohlen)
+
+Wenn die Website mit Composer verwaltet wird, im Projektverzeichnis ausführen:
+
+```bash
+composer require modestox/modestox-config-processor-wp
+```
+
+Mit DDEV:
+
+```bash
+ddev composer require modestox/modestox-config-processor-wp
+```
+
+Das Plugin wird zusammen mit seinen Abhängigkeiten nach `wp-content/plugins/modestox-config-processor-wp` installiert (über `composer/installers`). Fragt Composer, ob dem Plugin `composer/installers` vertraut werden soll, mit „ja“ antworten.
+
+### Aus GitHub
+
 ```bash
 cd wp-content/plugins
-git clone https://github.com/Modestox/config-processor-wordpress modestox-config-processor-wp
+git clone --branch 1.0.0 https://github.com/Modestox/config-processor-wordpress modestox-config-processor-wp
 cd modestox-config-processor-wp
 composer install --no-dev --optimize-autoloader
 ```
 
-Mit DDEV (aus dem Projektverzeichnis):
+`--branch 1.0.0` holt die veröffentlichte Version; ohne diese Option erhalten Sie den aktuellen Entwicklungsstand aus `main`.
+
+Mit DDEV wird der letzte Befehl aus dem Projektverzeichnis ausgeführt:
 
 ```bash
 ddev exec -d /var/www/html/wp-content/plugins/modestox-config-processor-wp composer install --no-dev --optimize-autoloader
@@ -290,11 +310,11 @@ Ein Feld wird nur angezeigt, wenn ein Elternfeld in **derselben Gruppe** den ben
 - Es können mehrere Bedingungen gesetzt werden, dann müssen alle erfüllt sein: `'depends' => ['use_api' => true, 'mode' => 'live']`.
 - Ketten funktionieren: Ist das Elternfeld ausgeblendet, ist auch das abhängige Feld ausgeblendet.
 - Der Wert wird mit dem Typ des Elternfelds angegeben:
-    - `boolean`: `true`/`false`;
-    - `yes_no`: `1`/`0`;
-    - `select`, `radio`: Optionsschlüssel;
-    - `number`: eine Zahl;
-    - `multiselect`, `checkbox`: eine Option (die Bedingung ist erfüllt, wenn sie ausgewählt ist).
+  - `boolean`: `true`/`false`;
+  - `yes_no`: `1`/`0`;
+  - `select`, `radio`: Optionsschlüssel;
+  - `number`: eine Zahl;
+  - `multiselect`, `checkbox`: eine Option (die Bedingung ist erfüllt, wenn sie ausgewählt ist).
 - Abhängigkeiten von einem Feld einer anderen Gruppe, von einem `infoblock`, von sich selbst sowie Zyklen sind nicht erlaubt. All das sind Schemafehler.
 
 Die Sichtbarkeit wird sowohl auf dem Server (beim Laden der Seite) als auch im Browser (bei Änderung der Felder) berechnet. Das Attribut `required` eines ausgeblendeten Felds blockiert das Absenden des Formulars nicht.

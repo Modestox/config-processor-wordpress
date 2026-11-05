@@ -46,14 +46,34 @@ WordPress-плагин, который строит страницы настр�
 
 ## Установка
 
+### Через Composer (рекомендуется)
+
+Если сайт управляется через Composer, выполните в корне проекта:
+
+```bash
+composer require modestox/modestox-config-processor-wp
+```
+
+С DDEV:
+
+```bash
+ddev composer require modestox/modestox-config-processor-wp
+```
+
+Плагин установится в `wp-content/plugins/modestox-config-processor-wp` вместе с зависимостями (через `composer/installers`). Если Composer спросит, доверять ли плагину `composer/installers`, ответьте «да».
+
+### Из GitHub
+
 ```bash
 cd wp-content/plugins
-git clone https://github.com/Modestox/config-processor-wordpress modestox-config-processor-wp
+git clone --branch 1.0.0 https://github.com/Modestox/config-processor-wordpress modestox-config-processor-wp
 cd modestox-config-processor-wp
 composer install --no-dev --optimize-autoloader
 ```
 
-С DDEV (из корня проекта):
+`--branch 1.0.0` берёт выпущенную версию; без него вы получите текущее состояние разработки из `main`.
+
+С DDEV последняя команда выполняется из корня проекта:
 
 ```bash
 ddev exec -d /var/www/html/wp-content/plugins/modestox-config-processor-wp composer install --no-dev --optimize-autoloader
@@ -290,11 +310,11 @@ $logging = modestox_config('my_plugin', 'checkout/payment/enable_logging');
 - Можно задать несколько условий, тогда должны выполниться все: `'depends' => ['use_api' => true, 'mode' => 'live']`.
 - Работают цепочки: если родитель скрыт, скрыт и зависимый.
 - Значение указывается с типом родителя:
-    - `boolean`: `true`/`false`;
-    - `yes_no`: `1`/`0`;
-    - `select`, `radio`: ключ опции;
-    - `number`: число;
-    - `multiselect`, `checkbox`: одна опция (условие выполнено, если она выбрана).
+  - `boolean`: `true`/`false`;
+  - `yes_no`: `1`/`0`;
+  - `select`, `radio`: ключ опции;
+  - `number`: число;
+  - `multiselect`, `checkbox`: одна опция (условие выполнено, если она выбрана).
 - Нельзя зависеть от поля другой группы, от `infoblock`, от самого себя, и нельзя создавать циклы. Всё это ошибки схемы.
 
 Видимость считается и на сервере (при загрузке страницы), и в браузере (при изменении полей). Атрибут `required` у скрытого поля не мешает отправке формы.

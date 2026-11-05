@@ -46,14 +46,34 @@ The description model is the same as `system.xml` in Magento: **tabs → section
 
 ## Installation
 
+### With Composer (recommended)
+
+If the site is managed with Composer, run in the project root:
+
+```bash
+composer require modestox/modestox-config-processor-wp
+```
+
+With DDEV:
+
+```bash
+ddev composer require modestox/modestox-config-processor-wp
+```
+
+The plugin is installed into `wp-content/plugins/modestox-config-processor-wp` together with its dependencies (through `composer/installers`). If Composer asks whether to trust the `composer/installers` plugin, answer yes.
+
+### From GitHub
+
 ```bash
 cd wp-content/plugins
-git clone https://github.com/Modestox/config-processor-wordpress modestox-config-processor-wp
+git clone --branch 1.0.0 https://github.com/Modestox/config-processor-wordpress modestox-config-processor-wp
 cd modestox-config-processor-wp
 composer install --no-dev --optimize-autoloader
 ```
 
-With DDEV (from the project root):
+`--branch 1.0.0` takes the released version; without it you get the current development state of `main`.
+
+With DDEV, the last command runs from the project root:
 
 ```bash
 ddev exec -d /var/www/html/wp-content/plugins/modestox-config-processor-wp composer install --no-dev --optimize-autoloader
@@ -290,11 +310,11 @@ A field is shown only when a parent in **the same group** has the required value
 - Several conditions can be set; then all of them must be met: `'depends' => ['use_api' => true, 'mode' => 'live']`.
 - Chains work: if the parent is hidden, the dependent field is hidden too.
 - The value is given with the parent's type:
-    - `boolean`: `true`/`false`;
-    - `yes_no`: `1`/`0`;
-    - `select`, `radio`: option key;
-    - `number`: a number;
-    - `multiselect`, `checkbox`: one option (the condition is met if it is selected).
+  - `boolean`: `true`/`false`;
+  - `yes_no`: `1`/`0`;
+  - `select`, `radio`: option key;
+  - `number`: a number;
+  - `multiselect`, `checkbox`: one option (the condition is met if it is selected).
 - Depending on a field of another group, on an `infoblock`, on itself, and creating cycles is not allowed. All of these are schema errors.
 
 Visibility is computed both on the server (when the page loads) and in the browser (when fields change). The `required` attribute of a hidden field does not block the form submission.
