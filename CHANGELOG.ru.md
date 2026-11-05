@@ -5,7 +5,7 @@
 Все заметные изменения проекта описываются в этом файле.
 Формат следует [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/), версии — [Semantic Versioning](https://semver.org/lang/ru/).
 
-## [1.0.0] - не выпущена
+## [1.0.0] - 2026-11-05
 
 Первая публичная версия.
 

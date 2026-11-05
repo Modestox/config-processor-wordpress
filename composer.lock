@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8d1823b1fcc30c272034547e138adebc",
+    "content-hash": "6e4d872b139490192adaffb04b121d62",
     "packages": [
         {
             "name": "composer/installers",
@@ -178,16 +178,7 @@
                     "Modestox\\ConfigProcessor\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Modestox\\ConfigProcessor\\Tests\\": "tests/"
-                }
-            },
-            "scripts": {
-                "test": [
-                    "phpunit"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -201,16 +192,16 @@
             "description": "Configuration schema validation and processing library for PHP",
             "homepage": "https://github.com/Modestox/config-processor",
             "keywords": [
+                "Settings",
                 "config",
                 "configuration",
                 "php",
                 "schema",
-                "settings",
                 "validator"
             ],
             "support": {
-                "source": "https://github.com/Modestox/config-processor/tree/v2.0.0",
-                "issues": "https://github.com/Modestox/config-processor/issues"
+                "issues": "https://github.com/Modestox/config-processor/issues",
+                "source": "https://github.com/Modestox/config-processor/tree/v2.0.0"
             },
             "time": "2026-11-04T22:00:52+00:00"
         }
