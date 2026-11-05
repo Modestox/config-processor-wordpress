@@ -14,38 +14,37 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class Radio
  *
- * Renders standard radio button option lists.
+ * Single choice from 'options' shown as radio buttons. Same value rules as Select.
  */
-class Radio extends AbstractField
+class Radio extends Select
 {
     /**
-     * Renders standard radio input HTML markup.
-     *
-     * @param string $fieldKey
-     * @param array<string, mixed> $fieldData
-     * @return void
+     * @inheritDoc
      */
-    public function render(string $fieldKey, array $fieldData): void
+    public function render(string $optionName, array $field, mixed $value): void
     {
-        $attr = $this->prepareAttributes($fieldKey, $fieldData, 'mtx-radio-node');
-        $options = (array)($fieldData['options'] ?? []);
         ?>
-        <fieldset class="<?php echo esc_attr($attr['classes']); ?>">
-            <?php foreach ($options as $value => $label): ?>
-                <label style="display: block; margin-bottom: 5px;">
+        <fieldset class="<?php echo esc_attr($this->cssClass($field, 'mtx-radio-node')); ?>">
+            <?php foreach ($this->options($field) as $key => $label): ?>
+                <label class="mtx-choice-label">
                     <input type="radio"
-                           name="<?php echo esc_attr($attr['option_name']); ?>"
-                           value="<?php echo esc_attr((string)$value); ?>"
-                            <?php checked($attr['value'], (string)$value); ?>
-                            <?php echo $attr['required_attr']; ?> />
-                    <?php echo esc_html(trim((string)$label)); ?>
+                           name="<?php echo esc_attr($optionName); ?>"
+                           value="<?php echo esc_attr((string)$key); ?>"
+                            <?php checked((string)$key, (string)$value); ?>
+                            <?php $this->requiredAttribute($field); ?> />
+                    <?php echo esc_html($label); ?>
                 </label>
             <?php endforeach; ?>
         </fieldset>
-
-        <?php if ($attr['comment'] !== ''): ?>
-        <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>
-    <?php endif; ?>
         <?php
+        $this->renderComment($field);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasLabelTarget(): bool
+    {
+        return false;
     }
 }

@@ -14,37 +14,81 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class BooleanToggle
  *
- * Renders boolean checkbox toggle switches with fallback state handling.
+ * Checkbox for the 'boolean' type. The value is a strict bool.
  */
 class BooleanToggle extends AbstractField
 {
+    private const TRUE_VALUES = ['1', 'true', 'on', 'yes'];
+    private const FALSE_VALUES = ['0', 'false', 'off', 'no', ''];
+
     /**
-     * Renders standard checkbox inputs matching binary states.
-     *
-     * @param string $fieldKey
-     * @param array<string, mixed> $fieldData
-     * @return void
+     * @inheritDoc
      */
-    public function render(string $fieldKey, array $fieldData): void
+    public function render(string $optionName, array $field, mixed $value): void
     {
-        $attr = $this->prepareAttributes($fieldKey, $fieldData, 'mtx-toggle-checkbox');
-        $checked = filter_var($attr['value'], FILTER_VALIDATE_BOOLEAN);
         ?>
-        <fieldset style="border:none; padding:0; margin:0;">
-            <input type="hidden" name="<?php echo esc_attr($attr['option_name']); ?>" value="0" />
+        <fieldset class="mtx-boolean-field">
+            <input type="hidden" name="<?php echo esc_attr($optionName); ?>" value="0" />
             <label>
                 <input type="checkbox"
-                       id="<?php echo esc_attr($attr['id']); ?>"
-                       name="<?php echo esc_attr($attr['option_name']); ?>"
-                       class="<?php echo esc_attr($attr['classes']); ?>"
+                       id="<?php echo esc_attr($this->inputId($optionName)); ?>"
+                       name="<?php echo esc_attr($optionName); ?>"
+                       class="<?php echo esc_attr($this->cssClass($field, 'mtx-toggle-checkbox')); ?>"
                        value="1"
-                        <?php checked($checked); ?>
-                        <?php echo $attr['required_attr']; ?> />
-                <?php if ($attr['comment'] !== ''): ?>
-                    <span class="description"><?php echo esc_html($attr['comment']); ?></span>
+                       <?php checked($value === true); ?>
+                       <?php $this->requiredAttribute($field); ?> />
+                <?php $comment = (string)($field['comment'] ?? ''); ?>
+                <?php if ($comment !== ''): ?>
+                    <span class="description"><?php echo esc_html($comment); ?></span>
                 <?php endif; ?>
             </label>
         </fieldset>
         <?php
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function settingType(): string
+    {
+        return 'boolean';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function defaultValue(array $field): mixed
+    {
+        return (bool)($field['default'] ?? false);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function normalize(mixed $value, array $field): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if ($value === null) {
+            return false;
+        }
+
+        if (is_int($value) && ($value === 0 || $value === 1)) {
+            return $value === 1;
+        }
+
+        if (is_string($value)) {
+            $value = strtolower(trim($value));
+            if (in_array($value, self::TRUE_VALUES, true)) {
+                return true;
+            }
+            if (in_array($value, self::FALSE_VALUES, true)) {
+                return false;
+            }
+        }
+
+        $this->fail(__('The value must be on or off.', 'modestox-config-processor-wp'));
     }
 }

@@ -8,14 +8,15 @@
  */
 
 /**
- * Plugin Name: Modestox Config Processor Integration Wordpress
- * Description: Integrates the strict PHP 8.3 Modestox Config Processor component into WordPress.
- * Version:     1.0.0
- * Author:      Sergey Kuzmitsky
- * License:     MIT
- * Requires PHP: 8.3
- * Text Domain:  modestox-config-processor-wp
- * Domain Path:  /languages
+ * Plugin Name:       Modestox Config Processor Integration Wordpress
+ * Description:       Builds WordPress admin settings pages from declarative arrays validated by Modestox Config Processor.
+ * Version:           1.1.0
+ * Requires at least: 6.4
+ * Requires PHP:      8.3
+ * Author:            Sergey Kuzmitsky
+ * License:           MIT
+ * Text Domain:       modestox-config-processor-wp
+ * Domain Path:       /languages
  */
 
 declare(strict_types=1);
@@ -26,15 +27,16 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// Initialize Composer Autoloader
+// The bundled autoloader is optional: the plugin may also be installed through the site's root Composer project.
 $autoloader = __DIR__ . '/vendor/autoload.php';
-if (file_exists($autoloader)) {
+if (is_readable($autoloader)) {
     require_once $autoloader;
 }
 
+require_once __DIR__ . '/src/functions.php';
+
 /**
- * Returns the main operational instance of the plugin adapter.
- * Replaces old-school $GLOBALS entries with a clean, type-hinted function wrapper.
+ * Returns the main instance of the adapter.
  *
  * @return Plugin
  */
@@ -43,7 +45,22 @@ function modestoxConfigAdapter(): Plugin
     return Plugin::instance();
 }
 
-// Bootstrap the plugin adapter lifecycle on WordPress initialization
 add_action('plugins_loaded', static function (): void {
-    modestoxConfigAdapter()->boot();
+    if (!class_exists(Plugin::class) || !class_exists(\Modestox\ConfigProcessor\Processor::class)) {
+        add_action('admin_notices', static function (): void {
+            if (!current_user_can('activate_plugins')) {
+                return;
+            }
+            printf(
+                '<div class="notice notice-error"><p>%s</p></div>',
+                esc_html(
+                    'Modestox Config Processor Integration: dependencies are missing. '
+                    . 'Run "composer install" in the plugin directory or install modestox/config-processor in the site Composer project.',
+                ),
+            );
+        });
+        return;
+    }
+
+    Plugin::instance()->boot(__FILE__);
 });

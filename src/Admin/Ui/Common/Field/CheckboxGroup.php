@@ -14,39 +14,38 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class CheckboxGroup
  *
- * Renders grouped input checkbox lists.
+ * Several choices from 'options' shown as checkboxes. Same value rules as MultiSelect.
+ * 'required' is not applied: on a checkbox group the browser would require every box.
  */
-class CheckboxGroup extends AbstractField
+class CheckboxGroup extends MultiSelect
 {
     /**
-     * Renders administrative sets of checklist boxes.
-     *
-     * @param string $fieldKey
-     * @param array<string, mixed> $fieldData
-     * @return void
+     * @inheritDoc
      */
-    public function render(string $fieldKey, array $fieldData): void
+    public function render(string $optionName, array $field, mixed $value): void
     {
-        $attr = $this->prepareAttributes($fieldKey, $fieldData, 'mtx-checkbox-group-container');
-        $options = (array)($fieldData['options'] ?? []);
-        $selectedValues = is_array($attr['value']) ? $attr['value'] : (array)maybe_unserialize($attr['value']);
+        $selected = $this->selectedMap($value);
         ?>
-        <fieldset class="<?php echo esc_attr($attr['classes']); ?>">
-            <?php foreach ($options as $value => $label): ?>
-                <label style="display: block; margin-bottom: 5px;">
+        <fieldset class="<?php echo esc_attr($this->cssClass($field, 'mtx-checkbox-group-container')); ?>">
+            <?php foreach ($this->options($field) as $key => $label): ?>
+                <label class="mtx-choice-label">
                     <input type="checkbox"
-                           name="<?php echo esc_attr($attr['option_name']); ?>[]"
-                           value="<?php echo esc_attr((string)$value); ?>"
-                            <?php checked(in_array((string)$value, $selectedValues, true)); ?>
-                            <?php echo $attr['required_attr']; ?> />
-                    <?php echo esc_html(trim((string)$label)); ?>
+                           name="<?php echo esc_attr($optionName); ?>[]"
+                           value="<?php echo esc_attr((string)$key); ?>"
+                           <?php checked(isset($selected[(string)$key])); ?> />
+                    <?php echo esc_html($label); ?>
                 </label>
             <?php endforeach; ?>
         </fieldset>
-
-        <?php if ($attr['comment'] !== ''): ?>
-        <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>
-    <?php endif; ?>
         <?php
+        $this->renderComment($field);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function hasLabelTarget(): bool
+    {
+        return false;
     }
 }

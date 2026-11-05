@@ -1,6 +1,6 @@
 {
   "name": "modestox/modestox-config-processor-wp",
-  "description": "WordPress integration plugin for Modestox Config Processor",
+  "description": "WordPress adapter for modestox/config-processor: builds admin settings pages from plain PHP arrays.",
   "homepage": "https://github.com/Modestox/config-processor-wordpress",
   "type": "wordpress-plugin",
   "license": "MIT",
@@ -11,10 +11,16 @@
       "homepage": "https://github.com/modestox"
     }
   ],
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/Modestox/config-processor"
+    }
+  ],
   "require": {
     "php": ">=8.3",
     "composer/installers": "^2.0",
-    "modestox/config-processor": "^1.0.1"
+    "modestox/config-processor": "^2.0"
   },
   "autoload": {
     "psr-4": {
@@ -24,6 +30,11 @@
   "config": {
     "allow-plugins": {
       "composer/installers": true
-    }
+    },
+    "optimize-autoloader": true,
+    "platform": {
+      "php": "8.3"
+    },
+    "sort-packages": true
   }
 }

@@ -2,12 +2,6 @@
     margin: 20px 20px 0 0;
 }
 
-.mtx-global-config-container h2 {
-    font-size: 23px;
-    font-weight: 400;
-    margin: 0 0 20px 0;
-}
-
 .mtx-sys-config-sidebar {
     width: 260px;
     flex-shrink: 0;
@@ -119,39 +113,20 @@
 
 .mtx-media-preview-box {
     margin-bottom: 10px;
-    max-width: 200px;
-}
-
-.mtx-preview-browser-mockup {
-    border: 1px solid #ccd0d4;
-    border-radius: 4px;
-    overflow: hidden;
-    background: #f6f7f7;
-}
-
-.mtx-preview-browser-tab {
-    background: #edf0f1;
-    padding: 4px 8px;
-    font-size: 10px;
     display: flex;
     align-items: center;
-    gap: 5px;
-    border-bottom: 1px solid #ccd0d4;
-    color: #4c5258;
-}
-
-.mtx-preview-favicon-node {
-    width: 12px;
-    height: 12px;
-    object-fit: contain;
+    gap: 6px;
 }
 
 .mtx-preview-image-node {
-    width: 100%;
+    max-width: 200px;
+    max-height: 150px;
     height: auto;
     display: block;
     background: #fff;
-    padding: 10px;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 6px;
     box-sizing: border-box;
 }
 
@@ -181,45 +156,168 @@
     box-sizing: border-box;
 }
 
+.mtx-dynamic-rows-actions {
+    margin-top: 10px;
+}
+
+/* Layout of the global settings page */
+.mtx-split-layout-wrapper {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    align-items: flex-start;
+}
+
+.mtx-sys-config-content {
+    flex-grow: 1;
+    min-width: 0;
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    padding: 20px 25px;
+    border-radius: 4px;
+}
+
+.mtx-global-group-table {
+    margin-bottom: 30px;
+}
+
+.mtx-global-group-title {
+    border-bottom: 1px solid #ccd0d4;
+    padding-bottom: 8px;
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+@media screen and (max-width: 782px) {
+    .mtx-split-layout-wrapper {
+        flex-direction: column;
+    }
+
+    .mtx-sys-config-sidebar {
+        width: 100%;
+    }
+}
+
+/* Fields */
+.mtx-boolean-field {
+    border: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mtx-choice-label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.mtx-infoblock {
+    margin: 5px 0;
+}
+
+.mtx-full-width-label {
+    display: block;
+    margin-bottom: 6px;
+}
+
+/* Locked default rows of dynamic_rows ('x_locked_column') */
+.mtx-locked-row input[readonly] {
+    background: #f6f7f7;
+    color: #50575e;
+}
+
+/* Action buttons of dynamic_rows: [up|down] [remove], all the same size */
 .mtx-actions-column {
-    width: 60px;
+    width: 130px;
     text-align: center !important;
 }
 
 .mtx-action-cell {
-    text-align: center;
-}
-
-.mtx-remove-row-btn {
-    border-color: #b32d2e !important;
-    color: #b32d2e !important;
-    background: #fff !important;
-    width: 50px !important;
-    height: 30px !important;
-    padding: 0 !important;
-    min-width: 30px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-.mtx-remove-row-btn:hover {
-    background: #b32d2e !important;
-    color: #fff !important;
-}
-
-.mtx-remove-row-btn .dashicons {
-    width: auto !important;
-    height: auto !important;
-    line-height: 1 !important;
-    margin: 0 !important;
-}
-
-.mtx-action-cell {
+    width: 130px;
     text-align: center;
     vertical-align: middle !important;
-    width: 50px;
+    white-space: nowrap;
 }
-.mtx-dynamic-rows-actions {
-    margin-top: 10px;
+
+.mtx-dynamic-rows-table .mtx-action-cell .button {
+    width: 32px;
+    min-width: 32px;
+    height: 30px;
+    min-height: 30px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    background: #fff;
+    box-shadow: none;
+}
+
+.mtx-dynamic-rows-table .mtx-action-cell .dashicons {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    line-height: 1;
+    margin: 0;
+}
+
+/* Up / down: one segmented pair, neutral until hovered */
+.mtx-move-group {
+    display: inline-flex;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.mtx-dynamic-rows-table .mtx-move-row-btn {
+    border-color: #8c8f94;
+    color: #50575e;
+}
+
+.mtx-dynamic-rows-table .mtx-move-row-btn[data-direction="up"] {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.mtx-dynamic-rows-table .mtx-move-row-btn[data-direction="down"] {
+    margin-left: -1px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.mtx-dynamic-rows-table .mtx-move-row-btn:hover:not(:disabled),
+.mtx-dynamic-rows-table .mtx-move-row-btn:focus-visible {
+    position: relative;
+    z-index: 1;
+    border-color: var(--wp-admin-theme-color, #2271b1);
+    color: var(--wp-admin-theme-color, #2271b1);
+    background: #f0f6fc;
+}
+
+.mtx-dynamic-rows-table .mtx-move-row-btn:disabled {
+    border-color: #dcdcde !important;
+    color: #c3c4c7 !important;
+    background: #f6f7f7 !important;
+    cursor: default;
+}
+
+/* Remove: red outline, filled on hover */
+.mtx-dynamic-rows-table .mtx-remove-row-btn {
+    border-color: #b32d2e;
+    color: #b32d2e;
+}
+
+.mtx-dynamic-rows-table .mtx-remove-row-btn:hover,
+.mtx-dynamic-rows-table .mtx-remove-row-btn:focus-visible {
+    border-color: #b32d2e;
+    background: #b32d2e;
+    color: #fff;
+}
+
+/* Lock of a default row: takes the same width as the three buttons */
+.mtx-locked-icon {
+    display: inline-block;
+    width: 108px;
+    height: 30px;
+    line-height: 30px;
+    color: #8c8f94;
 }

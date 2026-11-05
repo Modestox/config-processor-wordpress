@@ -6,183 +6,230 @@
  * @link      https://github.com/Modestox/config-processor-wordpress
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Behaviour of the dynamic rows, file and image fields.
+ */
+(() => {
+    'use strict';
+
+    // ----- Dynamic rows -----------------------------------------------------------------------
+
     /**
-     * Toggles the visibility of remove buttons based on row count.
-     * Prevents deleting the absolute last row.
+     * Rewrites the row index in the input names: option[3][column] -> option[0][column].
      *
-     * @param {HTMLElement} tableBody
+     * @param {HTMLElement} tbody
      */
-    const updateRemoveButtonsState = (tableBody) => {
-        const rows = tableBody.querySelectorAll('.mtx-dynamic-row');
-        rows.forEach(row => {
-            const removeBtn = row.querySelector('.mtx-remove-row-btn');
-            if (removeBtn) {
-                removeBtn.disabled = rows.length <= 1;
+    const reindexRows = (tbody) => {
+        tbody.querySelectorAll('.mtx-dynamic-row').forEach((row, index) => {
+            row.querySelectorAll('input[name]').forEach((input) => {
+                input.setAttribute('name', input.getAttribute('name').replace(/\[[^\]]*\]/, `[${index}]`));
+            });
+        });
+    };
+
+    /**
+     * Up/down buttons are disabled at the edges and next to a locked row: free rows swap only with free rows.
+     *
+     * @param {HTMLElement} tbody
+     */
+    const updateMoveButtons = (tbody) => {
+        tbody.querySelectorAll('.mtx-dynamic-row').forEach((row) => {
+            const previous = row.previousElementSibling;
+            const next = row.nextElementSibling;
+            const up = row.querySelector('.mtx-move-row-btn[data-direction="up"]');
+            const down = row.querySelector('.mtx-move-row-btn[data-direction="down"]');
+            if (up) {
+                up.disabled = !previous || previous.classList.contains('mtx-locked-row');
+            }
+            if (down) {
+                down.disabled = !next || next.classList.contains('mtx-locked-row');
             }
         });
     };
 
-    // Global click delegation handler
-    document.addEventListener('click', (event) => {
-        const target = event.target;
-
-        // 1. Add dynamic row logic
-        const addBtn = target.closest('.mtx-add-row-btn');
-        if (addBtn) {
-            event.preventDefault();
-
-            const tableId = addBtn.getAttribute('data-table');
-            const table = document.getElementById(tableId);
-            if (!table) return;
-
-            const tbody = table.querySelector('.mtx-dynamic-rows-body');
-            const templateHtml = document.getElementById(`${tableId}-template`)?.innerHTML;
-            if (!tbody || !templateHtml) return;
-
-            const currentIndex = tbody.querySelectorAll('.mtx-dynamic-row').length;
-            const compiledHtml = templateHtml.replace(/\{\{index\}\}/g, currentIndex.toString());
-
-            tbody.insertAdjacentHTML('beforeend', compiledHtml);
-            updateRemoveButtonsState(tbody);
+    /**
+     * @param {HTMLElement} moveButton
+     */
+    const moveRow = (moveButton) => {
+        const row = moveButton.closest('.mtx-dynamic-row');
+        const tbody = row ? row.closest('.mtx-dynamic-rows-body') : null;
+        if (!row || !tbody || row.classList.contains('mtx-locked-row')) {
             return;
         }
 
-        // 2. Remove dynamic row logic
-        const removeBtn = target.closest('.mtx-remove-row-btn');
-        if (removeBtn) {
-            event.preventDefault();
-
-            const row = removeBtn.closest('.mtx-dynamic-row');
-            if (!row) return;
-
-            const tbody = row.closest('.mtx-dynamic-rows-body');
-            if (!tbody) return;
-
-            if (tbody.querySelectorAll('.mtx-dynamic-row').length <= 1) return;
-
-            row.remove();
-
-            // Re-index remaining rows fields
-            tbody.querySelectorAll('.mtx-dynamic-row').forEach((currentRow, newIndex) => {
-                currentRow.querySelectorAll('input').forEach(input => {
-                    const currentName = input.getAttribute('name');
-                    if (currentName) {
-                        const updatedName = currentName.replace(/\[\d+\]/, `[${newIndex}]`);
-                        input.setAttribute('name', updatedName);
-                    }
-                });
-            });
-
-            updateRemoveButtonsState(tbody);
+        const goesUp = moveButton.getAttribute('data-direction') === 'up';
+        const neighbour = goesUp ? row.previousElementSibling : row.nextElementSibling;
+        if (!neighbour || neighbour.classList.contains('mtx-locked-row')) {
+            return;
         }
-    });
 
-    // Initial state validation check for dynamic tables
-    document.querySelectorAll('.mtx-dynamic-rows-body').forEach(tbody => {
-        updateRemoveButtonsState(tbody);
-    });
+        if (goesUp) {
+            tbody.insertBefore(row, neighbour);
+        } else {
+            tbody.insertBefore(neighbour, row);
+        }
 
-    // 3. WordPress Media Uploader Integration
-    document.addEventListener('click', (event) => {
-        const uploadBtn = event.target.closest('.mtx-media-upload-trigger');
-        if (!uploadBtn) return;
+        reindexRows(tbody);
+        updateMoveButtons(tbody);
+        moveButton.focus();
+        tbody.dispatchEvent(new Event('change', {bubbles: true}));
+    };
 
-        event.preventDefault();
+    /**
+     * @param {HTMLElement} addButton
+     */
+    const addRow = (addButton) => {
+        const tableId = addButton.getAttribute('data-table');
+        const table = document.getElementById(tableId);
+        const template = document.getElementById(`${tableId}-template`);
+        const tbody = table ? table.querySelector('.mtx-dynamic-rows-body') : null;
+        if (!tbody || !template) {
+            return;
+        }
 
-        const targetInputId = uploadBtn.getAttribute('data-target');
-        const targetInput = document.getElementById(targetInputId);
-        if (!targetInput) return;
+        const index = tbody.querySelectorAll('.mtx-dynamic-row').length;
+        tbody.insertAdjacentHTML('beforeend', template.innerHTML.replace(/\{\{index\}\}/g, String(index)));
+        updateMoveButtons(tbody);
+        tbody.dispatchEvent(new Event('change', {bubbles: true}));
+    };
 
-        const container = document.getElementById(`container_${targetInputId}`);
-        const modalTitle = uploadBtn.getAttribute('data-label-upload') || 'Choose Image';
+    /**
+     * The last row is cleared instead of removed, so the table never disappears.
+     *
+     * @param {HTMLElement} removeButton
+     */
+    const removeRow = (removeButton) => {
+        const row = removeButton.closest('.mtx-dynamic-row');
+        const tbody = row ? row.closest('.mtx-dynamic-rows-body') : null;
+        if (!row || !tbody) {
+            return;
+        }
 
-        const frame = wp.media({
-            title: modalTitle,
-            button: {
-                text: uploadBtn.getAttribute('data-label-change') || 'Use this image'
-            },
-            multiple: false
-        });
+        if (tbody.querySelectorAll('.mtx-dynamic-row').length <= 1) {
+            row.querySelectorAll('input').forEach((input) => {
+                input.value = '';
+            });
+        } else {
+            row.remove();
+            reindexRows(tbody);
+            updateMoveButtons(tbody);
+        }
+        tbody.dispatchEvent(new Event('change', {bubbles: true}));
+    };
 
+    // ----- File / image -----------------------------------------------------------------------
+
+    /**
+     * @param {HTMLElement} box .mtx-media-field
+     * @param {string} url
+     */
+    const setMedia = (box, url) => {
+        const input = box.querySelector('.mtx-media-value');
+        if (!input) {
+            return;
+        }
+        input.value = url;
+
+        const hasFile = url !== '';
+        const preview = box.querySelector('.mtx-media-preview-box');
+        if (preview) {
+            preview.style.display = hasFile ? '' : 'none';
+        }
+
+        const image = box.querySelector('.mtx-preview-image-node');
+        if (image) {
+            image.setAttribute('src', url);
+        }
+
+        const link = box.querySelector('.mtx-media-file-link');
+        if (link) {
+            link.setAttribute('href', url);
+            link.textContent = hasFile ? decodeURIComponent(url.split(/[?#]/)[0].split('/').pop() || url) : '';
+        }
+
+        const selectButton = box.querySelector('.mtx-media-select');
+        if (selectButton) {
+            selectButton.textContent = hasFile ? box.dataset.labelChange : box.dataset.labelSelect;
+        }
+
+        const removeButton = box.querySelector('.mtx-media-remove');
+        if (removeButton) {
+            removeButton.style.display = hasFile ? '' : 'none';
+        }
+
+        input.dispatchEvent(new Event('change', {bubbles: true}));
+    };
+
+    /**
+     * @param {HTMLElement} box
+     */
+    const openMediaFrame = (box) => {
+        if (typeof window.wp === 'undefined' || !window.wp.media) {
+            console.error('Modestox: the WordPress media library is not loaded on this page.');
+            return;
+        }
+
+        const options = {
+            title: box.dataset.labelSelect || 'Select',
+            button: {text: box.dataset.labelSelect || 'Select'},
+            multiple: false,
+        };
+        if (box.dataset.kind === 'image') {
+            options.library = {type: 'image'};
+        }
+
+        const frame = window.wp.media(options);
         frame.on('select', () => {
             const attachment = frame.state().get('selection').first().toJSON();
-            targetInput.value = attachment.url;
-
-            // Extract localized site name passed from PHP via wp_localize_script
-            const siteName = (typeof mtxConfigData !== 'undefined' && mtxConfigData.siteName)
-                ? mtxConfigData.siteName
-                : 'WordPress Site';
-
-            if (container) {
-                container.querySelectorAll('.mtx-preview-browser-tab span').forEach(span => {
-                    span.textContent = siteName;
-                });
-            }
-
-            targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+            setMedia(box, attachment.url || '');
         });
-
         frame.open();
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.mtx-dynamic-rows-body').forEach(updateMoveButtons);
     });
 
-    // 4. Media Preview UI State Toggle
+    // ----- Click delegation -------------------------------------------------------------------
+
     document.addEventListener('click', (event) => {
-        const target = event.target;
-
-        const removeMediaBtn = target.closest('.mtx-media-remove-trigger');
-        if (removeMediaBtn) {
-            event.preventDefault();
-
-            const targetInputId = removeMediaBtn.getAttribute('data-target');
-            const targetInput = document.getElementById(targetInputId);
-            const container = document.getElementById(`container_${targetInputId}`);
-            if (!targetInput || !container) return;
-
-            targetInput.value = '';
-
-            const previewBox = container.querySelector('.mtx-media-preview-box');
-            if (previewBox) previewBox.style.display = 'none';
-
-            const uploadBtn = container.querySelector('.mtx-media-upload-trigger');
-            if (uploadBtn) {
-                uploadBtn.textContent = uploadBtn.getAttribute('data-label-upload') || 'Upload';
-            }
-
-            removeMediaBtn.style.display = 'none';
-            targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+        const target = event.target instanceof Element ? event.target : null;
+        if (!target) {
             return;
         }
 
-        const uploadMediaBtn = target.closest('.mtx-media-upload-trigger');
-        if (uploadMediaBtn) {
-            const targetInputId = uploadMediaBtn.getAttribute('data-target');
-            const container = document.getElementById(`container_${targetInputId}`);
-            if (!container) return;
+        const addButton = target.closest('.mtx-add-row-btn');
+        if (addButton) {
+            event.preventDefault();
+            addRow(addButton);
+            return;
+        }
 
-            const targetInput = document.getElementById(targetInputId);
-            if (!targetInput) return;
+        const moveButton = target.closest('.mtx-move-row-btn');
+        if (moveButton) {
+            event.preventDefault();
+            moveRow(moveButton);
+            return;
+        }
 
-            const originalChangeHandler = () => {
-                const newUrl = targetInput.value;
-                if (newUrl === '') return;
+        const removeButton = target.closest('.mtx-remove-row-btn');
+        if (removeButton) {
+            event.preventDefault();
+            removeRow(removeButton);
+            return;
+        }
 
-                container.querySelectorAll('.mtx-preview-image-node, .mtx-preview-favicon-node').forEach(img => {
-                    img.setAttribute('src', newUrl);
-                });
+        const selectMedia = target.closest('.mtx-media-select');
+        if (selectMedia) {
+            event.preventDefault();
+            openMediaFrame(selectMedia.closest('.mtx-media-field'));
+            return;
+        }
 
-                const previewBox = container.querySelector('.mtx-media-preview-box');
-                if (previewBox) previewBox.style.display = '';
-
-                uploadMediaBtn.textContent = uploadMediaBtn.getAttribute('data-label-change') || 'Change';
-
-                const removeBtn = container.querySelector('.mtx-media-remove-trigger');
-                if (removeBtn) removeBtn.style.display = '';
-
-                targetInput.removeEventListener('change', originalChangeHandler);
-            };
-
-            targetInput.addEventListener('change', originalChangeHandler);
+        const removeMedia = target.closest('.mtx-media-remove');
+        if (removeMedia) {
+            event.preventDefault();
+            setMedia(removeMedia.closest('.mtx-media-field'), '');
         }
     });
-});
+})();

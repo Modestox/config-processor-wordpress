@@ -11,24 +11,36 @@ declare(strict_types=1);
 
 namespace Modestox\ConfigProcessorWp\Admin;
 
+use InvalidArgumentException;
+
 /**
  * Class OptionNameBuilder
  *
- * Generates standardized database option keys for configuration fields.
+ * The single place where option names are built:
+ *  - global page:   mtx_{section}_{group}_{field}
+ *  - plugin page:   {option_prefix}_{group}_{field}
+ *
+ * All parts are identifiers already checked against /^[a-z0-9_]+$/, so they are used as they are.
  */
-class OptionNameBuilder
+final class OptionNameBuilder
 {
     /**
-     * Builds a sanitized unique option key string from hierarchy parts.
-     *
-     * @param string $prefix
-     * @param string $group
-     * @param string $field
+     * Length of the wp_options.option_name column.
+     */
+    public const MAX_LENGTH = 191;
+
+    /**
+     * @param string ...$parts
      * @return string
      */
-    public static function build(string $prefix, string $group, string $field): string
+    public static function build(string ...$parts): string
     {
-        $parts = array_filter([$prefix, $group, $field]);
-        return implode('_', array_map('sanitize_key', $parts));
+        foreach ($parts as $part) {
+            if ($part === '') {
+                throw new InvalidArgumentException('Option name parts cannot be empty.');
+            }
+        }
+
+        return implode('_', $parts);
     }
 }

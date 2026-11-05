@@ -14,39 +14,110 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class MultiSelect
  *
- * Renders multiple selection dropdown menus.
+ * Several choices from 'options'. The value is a list of option keys in the order of 'options'.
+ * Nothing selected is an empty list.
  */
 class MultiSelect extends AbstractField
 {
     /**
-     * Renders standard multi-selection HTML markup.
-     *
-     * @param string $fieldKey
-     * @param array<string, mixed> $fieldData
-     * @return void
+     * @inheritDoc
      */
-    public function render(string $fieldKey, array $fieldData): void
+    public function render(string $optionName, array $field, mixed $value): void
     {
-        $attr = $this->prepareAttributes($fieldKey, $fieldData, 'regular-text');
-        $options = (array)($fieldData['options'] ?? []);
-        $selectedValues = is_array($attr['value']) ? $attr['value'] : (array)maybe_unserialize($attr['value']);
+        $selected = $this->selectedMap($value);
+        $options = $this->options($field);
         ?>
-        <select id="<?php echo esc_attr($attr['id']); ?>"
-                name="<?php echo esc_attr($attr['option_name']); ?>[]"
-                class="<?php echo esc_attr($attr['classes']); ?>"
-                multiple="multiple" size="5"
-                <?php echo $attr['required_attr']; ?>>
-            <?php foreach ($options as $value => $label): ?>
-                <?php $isSelected = in_array((string)$value, $selectedValues, true); ?>
-                <option value="<?php echo esc_attr((string)$value); ?>" <?php echo $isSelected ? 'selected="selected"' : ''; ?>>
-                    <?php echo esc_html(trim((string)$label)); ?>
+        <select id="<?php echo esc_attr($this->inputId($optionName)); ?>"
+                name="<?php echo esc_attr($optionName); ?>[]"
+                class="<?php echo esc_attr($this->cssClass($field, 'regular-text')); ?>"
+                multiple="multiple"
+                size="<?php echo esc_attr((string)min(max(count($options), 2), 8)); ?>"
+                <?php $this->requiredAttribute($field); ?>>
+            <?php foreach ($options as $key => $label): ?>
+                <option value="<?php echo esc_attr((string)$key); ?>" <?php selected(isset($selected[(string)$key])); ?>>
+                    <?php echo esc_html($label); ?>
                 </option>
             <?php endforeach; ?>
         </select>
-
-        <?php if ($attr['comment'] !== ''): ?>
-        <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>
-    <?php endif; ?>
         <?php
+        $this->renderComment($field);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function settingType(): string
+    {
+        return 'array';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function defaultValue(array $field): mixed
+    {
+        return (array)($field['default'] ?? []);
+    }
+
+    /**
+     * @inheritDoc
+     * @return list<int|string>
+     */
+    protected function normalize(mixed $value, array $field): array
+    {
+        if ($value === null || $value === '') {
+            return [];
+        }
+
+        if (!is_array($value)) {
+            $this->fail(__('The value must be a list of options.', 'modestox-config-processor-wp'));
+        }
+
+        $options = (array)($field['options'] ?? []);
+        $chosen = [];
+        foreach ($value as $item) {
+            if ($item === '') {
+                continue;
+            }
+            $key = $this->matchOption($item, $options);
+            if ($key === null) {
+                $this->fail(__('One of the selected values is not an allowed option.', 'modestox-config-processor-wp'));
+            }
+            $chosen[(string)$key] = true;
+        }
+
+        $result = [];
+        foreach (array_keys($options) as $key) {
+            if (isset($chosen[(string)$key])) {
+                $result[] = $key;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array<string, mixed> $field
+     * @return array<int|string, string>
+     */
+    protected function options(array $field): array
+    {
+        return array_map('strval', (array)($field['options'] ?? []));
+    }
+
+    /**
+     * @param mixed $value
+     * @return array<string, true>
+     */
+    protected function selectedMap(mixed $value): array
+    {
+        $map = [];
+        foreach ((array)$value as $key) {
+            if (is_scalar($key)) {
+                $map[(string)$key] = true;
+            }
+        }
+
+        return $map;
     }
 }

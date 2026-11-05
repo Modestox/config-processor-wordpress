@@ -11,183 +11,87 @@ declare(strict_types=1);
 
 namespace Modestox\ConfigProcessorWp\Admin\Ui\Common;
 
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\Text;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\Textarea;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\Password;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\BooleanToggle;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\YesNo;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\Number;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\DateTime;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\Select;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\Radio;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\MultiSelect;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\CheckboxGroup;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\DynamicRows;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\ImageUpload;
-use Modestox\ConfigProcessorWp\Admin\Ui\Common\Field\InfoBlock;
+use Modestox\ConfigProcessorWp\Field\FieldTypeRegistry;
 
 /**
  * Class FieldRender
  *
- * Directs layout generation mapping field types to specific input renders.
+ * Prints the form-table rows of one group.
  */
-class FieldRender
+final class FieldRender
 {
-    /**
-     * @var array<string, object>
-     */
-    private array $renderers = [];
+    private readonly DependencyResolver $dependencies;
 
     /**
-     * FieldRender constructor.
-     *
-     * @param array<string, array<string, mixed>> $fields
-     * @param string $mode
+     * @param array<string, array<string, mixed>> $fields Fields of one group.
+     * @param FieldTypeRegistry                   $types
      */
     public function __construct(
-            private readonly array $fields,
-            private readonly string $mode = 'table',
+        private readonly array $fields,
+        private readonly FieldTypeRegistry $types,
     ) {
-        $this->renderers = [
-                'text'         => new Text(),
-                'textarea'     => new Textarea(),
-                'password'     => new Password(),
-                'boolean'      => new BooleanToggle(),
-                'yes_no'       => new YesNo(),
-                'number'       => new Number(),
-                'datetime'     => new DateTime(),
-                'select'       => new Select(),
-                'radio'        => new Radio(),
-                'multiselect'  => new MultiSelect(),
-                'checkbox'     => new CheckboxGroup(),
-                'dynamic_rows' => new DynamicRows(),
-                'image'        => new ImageUpload(),
-                'infoblock'    => new InfoBlock(),
-        ];
+        $this->dependencies = new DependencyResolver($fields, $types);
     }
 
     /**
-     * Iterates through the field collection to execute row layout maps.
-     *
      * @return void
      */
     public function render(): void
     {
-        foreach ($this->fields as $key => $data) {
-            if ($this->mode === 'table') {
-                $this->renderTableRow((string)$key, (array)$data);
-            } else {
-                $this->renderDivRow((string)$key, (array)$data);
-            }
+        foreach ($this->fields as $key => $field) {
+            $this->renderRow((string)$key, $field);
         }
     }
 
     /**
-     * Outputs a field row wrapped in a standard WordPress table layout.
-     *
-     * @param string $key
-     * @param array<string, mixed> $data
+     * @param string               $key
+     * @param array<string, mixed> $field
      * @return void
      */
-    private function renderTableRow(string $key, array $data): void
+    private function renderRow(string $key, array $field): void
     {
-        $label = (string)($data['label'] ?? $key);
-        $optionName = (string)($data['_option_name'] ?? ('mtx_' . $key));
-        $uniqueId = 'config_' . $optionName;
+        $renderer = $this->types->renderer((string)$field['type']);
+        $optionName = (string)($field['_option_name'] ?? '');
+        $label = (string)($field['label'] ?? $key);
 
-        $dependsData = isset($data['depends']) ? json_encode($data['depends'], JSON_UNESCAPED_SLASHES) : '';
-        $styleAttr = '';
+        $classes = ['mtx-field-row', 'mtx-field-type-' . $field['type']];
+        $attributes = ' data-mtx-field="' . esc_attr($key) . '"';
+        if ($optionName !== '') {
+            $attributes .= ' data-mtx-option="' . esc_attr($optionName) . '"';
+        }
 
-        if ($dependsData !== '') {
-            $isVisible = $this->checkDependencies((array)$data['depends'], $optionName, $key);
-            if (!$isVisible) {
-                $styleAttr = ' style="display: none;"';
+        $rules = $this->dependencies->clientRules($field);
+        if ($rules !== []) {
+            $classes[] = 'mtx-dependent-row';
+            $attributes .= ' data-depends="' . esc_attr((string)wp_json_encode($rules)) . '"';
+            if (!$this->dependencies->isVisible($key)) {
+                $attributes .= ' style="display: none;"';
             }
         }
 
-        $rowAttrs = $dependsData !== '' ? ' class="mtx-dependent-row" data-depends="' . esc_attr($dependsData) . '"' . $styleAttr : '';
+        $value = $this->dependencies->value($key);
         ?>
-        <tr<?php echo $rowAttrs; ?>>
-            <th scope="row"><label for="<?php echo esc_attr($uniqueId); ?>"><?php echo esc_html($label); ?></label></th>
-            <td>
-                <?php $this->renderFieldContent($key, $data); ?>
-            </td>
+        <tr class="<?php echo esc_attr(implode(' ', $classes)); ?>"<?php echo $attributes; ?>>
+            <?php if ($renderer->isFullWidth()): ?>
+                <td colspan="2">
+                    <?php if ($label !== $key): ?>
+                        <strong class="mtx-full-width-label"><?php echo esc_html($label); ?></strong>
+                    <?php endif; ?>
+                    <?php $renderer->render($optionName, $field, $value); ?>
+                </td>
+            <?php else: ?>
+                <th scope="row">
+                    <?php if ($renderer->hasLabelTarget() && $optionName !== ''): ?>
+                        <label for="<?php echo esc_attr($renderer->inputId($optionName)); ?>"><?php echo esc_html($label); ?></label>
+                    <?php else: ?>
+                        <?php echo esc_html($label); ?>
+                    <?php endif; ?>
+                </th>
+                <td>
+                    <?php $renderer->render($optionName, $field, $value); ?>
+                </td>
+            <?php endif; ?>
         </tr>
         <?php
-    }
-
-    /**
-     * Outputs a field row wrapped in a custom div layout.
-     *
-     * @param string $key
-     * @param array<string, mixed> $data
-     * @return void
-     */
-    private function renderDivRow(string $key, array $data): void
-    {
-        $label = (string)($data['label'] ?? $key);
-        $optionName = (string)($data['_option_name'] ?? ('mtx_' . $key));
-        $uniqueId = 'config_' . $optionName;
-
-        $dependsData = isset($data['depends']) ? json_encode($data['depends'], JSON_UNESCAPED_SLASHES) : '';
-        $styleAttr = '';
-
-        if ($dependsData !== '') {
-            $isVisible = $this->checkDependencies((array)$data['depends'], $optionName, $key);
-            if (!$isVisible) {
-                $styleAttr = ' style="display: none;"';
-            }
-        }
-
-        $rowAttrs = $dependsData !== '' ? ' class="mtx-sys-config-form-row mtx-dependent-row" data-depends="' . esc_attr(
-                        $dependsData,
-                ) . '"' . $styleAttr : ' class="mtx-sys-config-form-row"';
-        ?>
-        <div<?php echo $rowAttrs; ?>>
-            <label for="<?php echo esc_attr($uniqueId); ?>"><?php echo esc_html($label); ?></label>
-            <?php $this->renderFieldContent($key, $data); ?>
-        </div>
-        <?php
-    }
-
-    /**
-     * Routes content generation to the matching field renderer instance.
-     *
-     * @param string $key
-     * @param array<string, mixed> $data
-     * @return void
-     */
-    private function renderFieldContent(string $key, array $data): void
-    {
-        $type = (string)($data['type'] ?? 'text');
-        if (isset($this->renderers[$type])) {
-            $this->renderers[$type]->render($key, $data);
-        }
-    }
-
-    /**
-     * Verifies if master dependency conditions are met during initial render.
-     *
-     * @param array<string, mixed> $dependencies
-     * @param string $currentOptionName
-     * @param string $currentFieldKey
-     * @return bool
-     */
-    private function checkDependencies(array $dependencies, string $currentOptionName, string $currentFieldKey): bool
-    {
-        foreach ($dependencies as $masterKey => $expectedValue) {
-            $masterOptionName = str_replace('_' . $currentFieldKey, '_' . $masterKey, $currentOptionName);
-            $currentMasterValue = get_option($masterOptionName, '0');
-
-            if (is_bool($currentMasterValue)) {
-                $currentMasterValue = $currentMasterValue ? '1' : '0';
-            }
-
-            if ((string)$currentMasterValue !== (string)$expectedValue) {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

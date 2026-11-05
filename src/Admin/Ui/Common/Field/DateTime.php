@@ -11,79 +11,77 @@ declare(strict_types=1);
 
 namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 
+use DateTimeImmutable;
+
 /**
  * Class DateTime
  *
- * Renders HTML5 date, time, and datetime inputs.
+ * Date, time or date and time, depending on 'view_mode'. Stored in the library formats:
+ * 'Y-m-d H:i:s', 'Y-m-d' or 'H:i:s'. An empty string means "not set".
  */
 class DateTime extends AbstractField
 {
     /**
-     * Renders temporal input HTML markup.
-     *
-     * @param string $fieldKey
-     * @param array<string, mixed> $fieldData
-     * @return void
+     * view_mode => [storage format, accepted input formats, HTML input type, HTML value format].
      */
-    public function render(string $fieldKey, array $fieldData): void
+    private const MODES = [
+        'datetime' => ['Y-m-d H:i:s', ['Y-m-d H:i:s', 'Y-m-d H:i', 'Y-m-d\TH:i:s', 'Y-m-d\TH:i'], 'datetime-local', 'Y-m-d\TH:i'],
+        'date'     => ['Y-m-d', ['Y-m-d'], 'date', 'Y-m-d'],
+        'time'     => ['H:i:s', ['H:i:s', 'H:i'], 'time', 'H:i'],
+    ];
+
+    /**
+     * @inheritDoc
+     */
+    public function render(string $optionName, array $field, mixed $value): void
     {
-        $attr = $this->prepareAttributes($fieldKey, $fieldData, 'regular-text');
-        $viewMode = (string)($fieldData['view_mode'] ?? 'datetime');
-        $value = trim((string)$attr['value']);
+        [$storageFormat, , $inputType, $inputFormat] = $this->mode($field);
 
-        if ($viewMode === 'datetime' && $value !== '') {
-            $value = str_replace(' ', 'T', $value);
-            if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/', $value)) {
-                $value = substr($value, 0, 16);
-            }
+        $inputValue = '';
+        if (is_string($value) && $value !== '') {
+            $date = DateTimeImmutable::createFromFormat('!' . $storageFormat, $value);
+            $inputValue = $date !== false ? $date->format($inputFormat) : '';
         }
-
-        $inputType = match ($viewMode) {
-            'time' => 'time',
-            'date' => 'date',
-            default => 'datetime-local',
-        };
-
         ?>
         <input type="<?php echo esc_attr($inputType); ?>"
-               id="<?php echo esc_attr($attr['id']); ?>"
-               name="<?php echo esc_attr($attr['option_name']); ?>"
-               class="<?php echo esc_attr($attr['classes']); ?>"
-               value="<?php echo esc_attr($value); ?>"
-                <?php echo $attr['required_attr']; ?> />
-        <?php if ($attr['comment'] !== ''): ?>
-            <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>
-        <?php endif; ?>
+               id="<?php echo esc_attr($this->inputId($optionName)); ?>"
+               name="<?php echo esc_attr($optionName); ?>"
+               class="<?php echo esc_attr($this->cssClass($field, 'regular-text')); ?>"
+               value="<?php echo esc_attr($inputValue); ?>"
+               <?php $this->requiredAttribute($field); ?> />
         <?php
+        $this->renderComment($field);
     }
 
     /**
-     * Normalizes temporal values back to core storage standards.
-     *
-     * @param mixed $value
-     * @param array<string, mixed> $fieldData
-     * @return string
+     * @inheritDoc
      */
-    public function sanitize(mixed $value, array $fieldData): string
+    protected function normalize(mixed $value, array $field): string
     {
-        $clean = trim((string)$value);
-        if ($clean === '') {
+        $value = trim($this->scalarToString($value));
+        if ($value === '') {
             return '';
         }
 
-        $viewMode = (string)($fieldData['view_mode'] ?? 'datetime');
+        [$storageFormat, $accepted] = $this->mode($field);
 
-        if ($viewMode === 'datetime') {
-            $clean = str_replace('T', ' ', $clean);
-            if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/', $clean)) {
-                $clean .= ':00';
+        foreach ($accepted as $format) {
+            $date = DateTimeImmutable::createFromFormat('!' . $format, $value);
+            if ($date !== false && $date->format($format) === $value) {
+                return $date->format($storageFormat);
             }
         }
 
-        if ($viewMode === 'time' && preg_match('/^\d{2}:\d{2}$/', $clean)) {
-            $clean .= ':00';
-        }
+        /* translators: %s: expected format, e.g. Y-m-d */
+        $this->fail(sprintf(__('The value must be a valid date/time in the format %s.', 'modestox-config-processor-wp'), $storageFormat));
+    }
 
-        return $clean;
+    /**
+     * @param array<string, mixed> $field
+     * @return array{0: string, 1: list<string>, 2: string, 3: string}
+     */
+    private function mode(array $field): array
+    {
+        return self::MODES[(string)($field['view_mode'] ?? 'datetime')] ?? self::MODES['datetime'];
     }
 }

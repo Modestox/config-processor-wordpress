@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "86bab09ba457e8adcbd1104d1d733ae5",
+    "content-hash": "8d1823b1fcc30c272034547e138adebc",
     "packages": [
         {
             "name": "composer/installers",
@@ -154,16 +154,16 @@
         },
         {
             "name": "modestox/config-processor",
-            "version": "v1.0.1",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Modestox/config-processor.git",
-                "reference": "3cea7145b7a75f79b274fd0fde74629367726932"
+                "reference": "8e8c6cba0700ad754d029ee8b2359c16b48f1a27"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Modestox/config-processor/zipball/3cea7145b7a75f79b274fd0fde74629367726932",
-                "reference": "3cea7145b7a75f79b274fd0fde74629367726932",
+                "url": "https://api.github.com/repos/Modestox/config-processor/zipball/8e8c6cba0700ad754d029ee8b2359c16b48f1a27",
+                "reference": "8e8c6cba0700ad754d029ee8b2359c16b48f1a27",
                 "shasum": ""
             },
             "require": {
@@ -178,7 +178,16 @@
                     "Modestox\\ConfigProcessor\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Modestox\\ConfigProcessor\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "phpunit"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -192,29 +201,32 @@
             "description": "Configuration schema validation and processing library for PHP",
             "homepage": "https://github.com/Modestox/config-processor",
             "keywords": [
-                "Settings",
                 "config",
                 "configuration",
                 "php",
                 "schema",
+                "settings",
                 "validator"
             ],
             "support": {
-                "issues": "https://github.com/Modestox/config-processor/issues",
-                "source": "https://github.com/Modestox/config-processor/tree/v1.0.1"
+                "source": "https://github.com/Modestox/config-processor/tree/v2.0.0",
+                "issues": "https://github.com/Modestox/config-processor/issues"
             },
-            "time": "2026-06-19T07:20:04+00:00"
+            "time": "2026-11-04T22:00:52+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.3"
     },
-    "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "platform-dev": [],
+    "platform-overrides": {
+        "php": "8.3"
+    },
+    "plugin-api-version": "2.6.0"
 }

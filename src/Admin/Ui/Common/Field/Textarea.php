@@ -14,30 +14,42 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class Textarea
  *
- * Renders standard multi-line text area input fields.
+ * Multi-line text. Line breaks are kept (normalized to "\n"), the value is trimmed.
+ * Markup is kept as is only for users with the 'unfiltered_html' capability.
  */
 class Textarea extends AbstractField
 {
     /**
-     * Renders textarea input HTML markup.
-     *
-     * @param string $fieldKey
-     * @param array<string, mixed> $fieldData
-     * @return void
+     * @inheritDoc
      */
-    public function render(string $fieldKey, array $fieldData): void
+    public function render(string $optionName, array $field, mixed $value): void
     {
-        $attr = $this->prepareAttributes($fieldKey, $fieldData, 'large-text');
         ?>
-        <textarea id="<?php echo esc_attr($attr['id']); ?>"
-                  name="<?php echo esc_attr($attr['option_name']); ?>"
-                  class="<?php echo esc_attr($attr['classes']); ?>"
-                  placeholder="<?php echo esc_attr($attr['placeholder']); ?>"
+        <textarea id="<?php echo esc_attr($this->inputId($optionName)); ?>"
+                  name="<?php echo esc_attr($optionName); ?>"
+                  class="<?php echo esc_attr($this->cssClass($field, 'large-text')); ?>"
+                  placeholder="<?php echo esc_attr((string)($field['placeholder'] ?? '')); ?>"
                   rows="5" cols="50"
-                  <?php echo $attr['required_attr']; ?>><?php echo esc_html($attr['value']); ?></textarea>
-        <?php if ($attr['comment'] !== ''): ?>
-        <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>
-    <?php endif; ?>
+                  <?php $this->requiredAttribute($field); ?>><?php echo esc_textarea((string)$value); ?></textarea>
         <?php
+        $this->renderComment($field);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function sanitize(mixed $input, array $field, mixed $previous): mixed
+    {
+        return $this->filterMarkup($this->normalize($input, $field));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function normalize(mixed $value, array $field): string
+    {
+        $value = str_replace(["\r\n", "\r", "\0"], ["\n", "\n", ''], $this->scalarToString($value));
+
+        return trim($value);
     }
 }

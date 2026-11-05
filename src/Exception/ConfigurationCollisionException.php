@@ -14,6 +14,6 @@ namespace Modestox\ConfigProcessorWp\Exception;
 /**
  * Class ConfigurationCollisionException
  *
- * Thrown when a duplicate configuration path or plugin identifier collision occurs.
+ * Thrown when a plugin tries to declare or change a part of the global schema owned by another plugin.
  */
 class ConfigurationCollisionException extends \Exception {}

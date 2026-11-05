@@ -14,34 +14,42 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class Text
  *
- * Renders standard single-line text input fields.
+ * Single-line text input. Stored as a trimmed string without line breaks.
  */
 class Text extends AbstractField
 {
     /**
-     * Renders text input HTML markup.
-     *
-     * @param string $fieldKey
-     * @param array<string, mixed> $fieldData
-     * @return void
+     * @inheritDoc
      */
-    public function render(string $fieldKey, array $fieldData): void
+    public function render(string $optionName, array $field, mixed $value): void
     {
-        $attr = $this->prepareAttributes($fieldKey, $fieldData, 'regular-text');
         ?>
         <input type="text"
-               id="<?php echo esc_attr($attr['id']); ?>"
-               name="<?php echo esc_attr($attr['option_name']); ?>"
-               class="<?php echo esc_attr($attr['classes']); ?>"
-               placeholder="<?php echo esc_attr($attr['placeholder']); ?>"
-               value="<?php echo esc_attr($attr['value']); ?>"
-                <?php echo $attr['required_attr']; ?>/>
-
-        <?php if ($attr['comment'] !== ''): ?>
-        <p class="mtx-config-field-comment">
-            <?php echo esc_html($attr['comment']); ?>
-        </p>
-    <?php endif; ?>
+               id="<?php echo esc_attr($this->inputId($optionName)); ?>"
+               name="<?php echo esc_attr($optionName); ?>"
+               class="<?php echo esc_attr($this->cssClass($field, 'regular-text')); ?>"
+               value="<?php echo esc_attr((string)$value); ?>"
+               placeholder="<?php echo esc_attr((string)($field['placeholder'] ?? '')); ?>"
+               <?php $this->requiredAttribute($field); ?> />
         <?php
+        $this->renderComment($field);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function sanitize(mixed $input, array $field, mixed $previous): mixed
+    {
+        return $this->filterMarkup($this->normalize($input, $field));
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function normalize(mixed $value, array $field): string
+    {
+        $value = str_replace(["\r\n", "\r", "\n", "\0"], [' ', ' ', ' ', ''], $this->scalarToString($value));
+
+        return trim($value);
     }
 }

@@ -12,58 +12,36 @@ declare(strict_types=1);
 namespace Modestox\ConfigProcessorWp\Admin\Ui\GlobalLayout;
 
 use Modestox\ConfigProcessorWp\Admin\Ui\Common\FieldRender;
-use Modestox\ConfigProcessorWp\Admin\OptionNameBuilder;
+use Modestox\ConfigProcessorWp\Field\FieldTypeRegistry;
 
 /**
  * Class GroupContainer
  *
- * Renders configuration group containers and their fields.
+ * Groups of the active section of the global settings page.
  */
-class GroupContainer
+final class GroupContainer
 {
     /**
-     * GroupContainer constructor.
-     *
-     * @param array<string, array<string, mixed>> $groups
-     * @param string $namespace
+     * @param array<string, array<string, mixed>> $groups Validated groups.
+     * @param FieldTypeRegistry                   $types
      */
     public function __construct(
-            private readonly array $groups,
-            private readonly string $namespace
+        private readonly array $groups,
+        private readonly FieldTypeRegistry $types,
     ) {}
 
     /**
-     * Renders configuration group boxes with standard tables.
-     *
      * @return void
      */
     public function render(): void
     {
-        foreach ($this->groups as $groupKey => $groupData) {
-            $fields = (array)($groupData['fields'] ?? []);
-
-            // Dynamically generate unique database keys based on layout hierarchy
-            foreach ($fields as $fKey => &$field) {
-                if (!isset($field['_option_name'])) {
-                    $field['_option_name'] = OptionNameBuilder::build(
-                            $this->namespace,
-                            (string)$groupKey,
-                            (string)$fKey
-                    );
-                    $field['option_name'] = $field['_option_name'];
-                }
-            }
-            unset($field);
-
+        foreach ($this->groups as $groupKey => $group) {
             ?>
-            <div class="mtx-global-group-table" style="margin-bottom: 30px;">
-                <h3 style="border-bottom: 1px solid #ccd0d4; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px; font-weight: 600;">
-                    <?php echo esc_html($groupData['label'] ?? $groupKey); ?>
-                </h3>
-
+            <div class="mtx-global-group-table" data-mtx-group="<?php echo esc_attr((string)$groupKey); ?>">
+                <h3 class="mtx-global-group-title"><?php echo esc_html((string)$group['label']); ?></h3>
                 <table class="form-table" role="presentation">
                     <tbody>
-                    <?php (new FieldRender($fields, 'table'))->render(); ?>
+                    <?php (new FieldRender((array)$group['fields'], $this->types))->render(); ?>
                     </tbody>
                 </table>
             </div>

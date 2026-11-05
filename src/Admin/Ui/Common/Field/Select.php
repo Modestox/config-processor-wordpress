@@ -14,36 +14,52 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class Select
  *
- * Renders standard single selection dropdown menus.
+ * Single choice from 'options'. The value is the option key with its original type (int or string).
  */
 class Select extends AbstractField
 {
     /**
-     * Renders standard dropdown select HTML markup.
-     *
-     * @param string $fieldKey
-     * @param array<string, mixed> $fieldData
-     * @return void
+     * @inheritDoc
      */
-    public function render(string $fieldKey, array $fieldData): void
+    public function render(string $optionName, array $field, mixed $value): void
     {
-        $attr = $this->prepareAttributes($fieldKey, $fieldData, 'regular-text');
-        $options = (array)($fieldData['options'] ?? []);
         ?>
-        <select id="<?php echo esc_attr($attr['id']); ?>"
-                name="<?php echo esc_attr($attr['option_name']); ?>"
-                class="<?php echo esc_attr($attr['classes']); ?>"
-                <?php echo $attr['required_attr']; ?>>
-            <?php foreach ($options as $value => $label): ?>
-                <option value="<?php echo esc_attr((string)$value); ?>" <?php selected($attr['value'], (string)$value); ?>>
-                    <?php echo esc_html(trim((string)$label)); ?>
+        <select id="<?php echo esc_attr($this->inputId($optionName)); ?>"
+                name="<?php echo esc_attr($optionName); ?>"
+                class="<?php echo esc_attr($this->cssClass($field, 'regular-text')); ?>"
+                <?php $this->requiredAttribute($field); ?>>
+            <?php foreach ($this->options($field) as $key => $label): ?>
+                <option value="<?php echo esc_attr((string)$key); ?>" <?php selected((string)$key, (string)$value); ?>>
+                    <?php echo esc_html($label); ?>
                 </option>
             <?php endforeach; ?>
         </select>
-
-        <?php if ($attr['comment'] !== ''): ?>
-        <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>
-    <?php endif; ?>
         <?php
+        $this->renderComment($field);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function normalize(mixed $value, array $field): int|string
+    {
+        $key = $this->matchOption($value, (array)($field['options'] ?? []));
+
+        if ($key === null) {
+            $this->fail(__('The selected value is not one of the allowed options.', 'modestox-config-processor-wp'));
+        }
+
+        return $key;
+    }
+
+    /**
+     * Options in display order with their labels.
+     *
+     * @param array<string, mixed> $field
+     * @return array<int|string, string>
+     */
+    protected function options(array $field): array
+    {
+        return array_map('strval', (array)($field['options'] ?? []));
     }
 }

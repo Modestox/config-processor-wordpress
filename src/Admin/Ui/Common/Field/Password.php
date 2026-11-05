@@ -14,31 +14,42 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class Password
  *
- * Renders secure password input fields.
+ * The saved password is never printed into the page. An empty submission keeps the saved value.
  */
-class Password extends AbstractField
+class Password extends Text
 {
     /**
-     * Renders password input HTML markup.
-     *
-     * @param string $fieldKey
-     * @param array<string, mixed> $fieldData
-     * @return void
+     * @inheritDoc
      */
-    public function render(string $fieldKey, array $fieldData): void
+    public function render(string $optionName, array $field, mixed $value): void
     {
-        $attr = $this->prepareAttributes($fieldKey, $fieldData, 'regular-text');
+        $hasValue = (string)$value !== '';
         ?>
         <input type="password"
-               id="<?php echo esc_attr($attr['id']); ?>"
-               name="<?php echo esc_attr($attr['option_name']); ?>"
-               class="<?php echo esc_attr($attr['classes']); ?>"
-               value="<?php echo esc_attr($attr['value']); ?>"
-                <?php echo $attr['placeholder'] !== '' ? 'placeholder="' . esc_attr($attr['placeholder']) . '"' : ''; ?>
-                <?php echo $attr['required_attr']; ?> />
-        <?php if ($attr['comment'] !== ''): ?>
-        <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>
-    <?php endif; ?>
-        <?php
+               id="<?php echo esc_attr($this->inputId($optionName)); ?>"
+               name="<?php echo esc_attr($optionName); ?>"
+               class="<?php echo esc_attr($this->cssClass($field, 'regular-text')); ?>"
+               value=""
+               autocomplete="new-password"
+               placeholder="<?php echo esc_attr($hasValue ? '••••••••' : ''); ?>"
+                <?php if (!$hasValue) {
+                    $this->requiredAttribute($field);
+                } ?> />
+        <?php if ($hasValue): ?>
+        <p class="description mtx-sys-config-field-comment">
+            <?php echo esc_html__('A password is saved. Leave the field empty to keep it.', 'modestox-config-processor-wp'); ?>
+        </p>
+    <?php endif;
+        $this->renderComment($field);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function sanitize(mixed $input, array $field, mixed $previous): mixed
+    {
+        $value = $this->normalize($input, $field);
+
+        return $value === '' ? (string)$previous : $value;
     }
 }

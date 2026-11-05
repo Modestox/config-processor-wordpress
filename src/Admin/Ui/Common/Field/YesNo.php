@@ -14,33 +14,44 @@ namespace Modestox\ConfigProcessorWp\Admin\Ui\Common\Field;
 /**
  * Class YesNo
  *
- * Renders select dropdowns for binary Yes/No choices.
+ * Yes/No select. The library fixes the options to 0/1, so the value is the integer 1 or 0.
  */
-class YesNo extends AbstractField
+class YesNo extends Select
 {
     /**
-     * Renders binary selection dropdown HTML markup.
-     *
-     * @param string $fieldKey
-     * @param array<string, mixed> $fieldData
-     * @return void
+     * @inheritDoc
      */
-    public function render(string $fieldKey, array $fieldData): void
+    public function settingType(): string
     {
-        $attr = $this->prepareAttributes($fieldKey, $fieldData, 'small-text');
-        $selectedValue = (int)$attr['value'];
-        ?>
-        <select id="<?php echo esc_attr($attr['id']); ?>"
-                name="<?php echo esc_attr($attr['option_name']); ?>"
-                class="<?php echo esc_attr($attr['classes']); ?>"
-                <?php echo $attr['required_attr']; ?>>
-            <option value="1" <?php selected($selectedValue, 1); ?>><?php echo esc_html__('Yes', 'modestox-config-processor-wp'); ?></option>
-            <option value="0" <?php selected($selectedValue, 0); ?>><?php echo esc_html__('No', 'modestox-config-processor-wp'); ?></option>
-        </select>
+        return 'integer';
+    }
 
-        <?php if ($attr['comment'] !== ''): ?>
-        <p class="mtx-sys-config-field-comment"><?php echo esc_html($attr['comment']); ?></p>
-    <?php endif; ?>
-        <?php
+    /**
+     * @inheritDoc
+     */
+    public function defaultValue(array $field): mixed
+    {
+        return (int)($field['default'] ?? 0);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function normalize(mixed $value, array $field): int|string
+    {
+        return (int)parent::normalize($value, $field + ['options' => [0 => 'No', 1 => 'Yes']]);
+    }
+
+    /**
+     * Translated labels, "Yes" first.
+     *
+     * @inheritDoc
+     */
+    protected function options(array $field): array
+    {
+        return [
+                1 => __('Yes', 'modestox-config-processor-wp'),
+                0 => __('No', 'modestox-config-processor-wp'),
+        ];
     }
 }

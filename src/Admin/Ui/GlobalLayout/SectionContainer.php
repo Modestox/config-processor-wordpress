@@ -11,61 +11,43 @@ declare(strict_types=1);
 
 namespace Modestox\ConfigProcessorWp\Admin\Ui\GlobalLayout;
 
+use Modestox\ConfigProcessorWp\Field\FieldTypeRegistry;
+
 /**
  * Class SectionContainer
  *
- * Renders major page sections and coordinates their group child layouts.
+ * Title and groups of the active section of the global settings page.
  */
-class SectionContainer
+final class SectionContainer
 {
     /**
-     * SectionContainer constructor.
-     *
-     * @param array<string, array<string, mixed>> $sections
-     * @param string $activeSection
-     * @param string $basePrefix
+     * @param array<string, mixed> $section Validated section.
+     * @param FieldTypeRegistry    $types
      */
     public function __construct(
-            private readonly array $sections,
-            private readonly string $activeSection,
-            private readonly string $basePrefix,
+        private readonly array $section,
+        private readonly FieldTypeRegistry $types,
     ) {}
 
     /**
-     * Renders the active configuration section with its underlying group blocks.
-     *
      * @return void
      */
     public function render(): void
     {
-        if (!isset($this->sections[$this->activeSection])) {
-            return;
-        }
-
-        $sectionData = (array)$this->sections[$this->activeSection];
-        $groups = (array)($sectionData['groups'] ?? []);
-
-        $customSectionClass = (string)($sectionData['class'] ?? '');
-        $sectionIcon = (string)($sectionData['icon'] ?? '');
-
-        $wrapperClass = 'mtx-sys-config-section-wrapper';
-        if ($customSectionClass !== '') {
-            $wrapperClass .= ' ' . $customSectionClass;
-        }
-
-        // Build hierarchical layout namespace for input field persistence mapping
-        $namespace = $this->basePrefix . '_' . $this->activeSection;
+        $icon = TabNavigation::iconClass((string)($this->section['icon'] ?? ''));
+        $groups = (array)($this->section['groups'] ?? []);
         ?>
-        <div class="<?php echo esc_attr($wrapperClass); ?>">
+        <div class="<?php echo esc_attr(trim('mtx-sys-config-section-wrapper ' . (string)($this->section['class'] ?? ''))); ?>">
             <h2 class="mtx-sys-config-section-title">
-                <?php if ($sectionIcon !== ''): ?>
-                    <span class="dashicons <?php echo esc_attr($sectionIcon); ?> mtx-sys-config-icon"></span>
+                <?php if ($icon !== ''): ?>
+                    <span class="dashicons <?php echo esc_attr($icon); ?> mtx-sys-config-icon"></span>
                 <?php endif; ?>
-                <?php echo esc_html($sectionData['label'] ?? $this->activeSection); ?>
+                <?php echo esc_html((string)$this->section['label']); ?>
             </h2>
-
-            <?php if (!empty($groups)): ?>
-                <?php (new GroupContainer($groups, $namespace))->render(); ?>
+            <?php if ($groups === []): ?>
+                <p><?php echo esc_html__('This section has no settings yet.', 'modestox-config-processor-wp'); ?></p>
+            <?php else: ?>
+                <?php (new GroupContainer($groups, $this->types))->render(); ?>
             <?php endif; ?>
         </div>
         <?php

@@ -12,55 +12,36 @@ declare(strict_types=1);
 namespace Modestox\ConfigProcessorWp\Admin\Ui\PluginLayout;
 
 use Modestox\ConfigProcessorWp\Admin\Ui\Common\FieldRender;
-use Modestox\ConfigProcessorWp\Admin\OptionNameBuilder;
+use Modestox\ConfigProcessorWp\Field\FieldTypeRegistry;
 
 /**
  * Class GroupContainer
  *
- * Renders configuration groups and fields for plugin standalone layouts.
+ * Groups of a plugin settings page, each one as a separate box.
  */
-class GroupContainer
+final class GroupContainer
 {
     /**
-     * GroupContainer constructor.
-     *
-     * @param array<string, array<string, mixed>> $groups
-     * @param string $prefix
+     * @param array<string, array<string, mixed>> $groups Validated groups.
+     * @param FieldTypeRegistry                   $types
      */
     public function __construct(
-            private readonly array $groups,
-            private readonly string $prefix = '',
+        private readonly array $groups,
+        private readonly FieldTypeRegistry $types,
     ) {}
 
     /**
-     * Renders plugin group tables layout.
-     *
      * @return void
      */
     public function render(): void
     {
-        foreach ($this->groups as $groupKey => $groupData) {
-            $fields = (array)($groupData['fields'] ?? []);
-
-            foreach ($fields as $fKey => &$field) {
-                if (!isset($field['_option_name'])) {
-                    $field['_option_name'] = OptionNameBuilder::build(
-                            $this->prefix,
-                            (string)$groupKey,
-                            (string)$fKey,
-                    );
-                    $field['option_name'] = $field['_option_name'];
-                }
-            }
-            unset($field);
-
+        foreach ($this->groups as $groupKey => $group) {
             ?>
-            <div class="mtx-plugin-table">
-                <h2><?php echo esc_html($groupData['label'] ?? $groupKey); ?></h2>
-
+            <div class="mtx-plugin-table" data-mtx-group="<?php echo esc_attr((string)$groupKey); ?>">
+                <h2><?php echo esc_html((string)$group['label']); ?></h2>
                 <table class="form-table" role="presentation">
                     <tbody>
-                    <?php (new FieldRender($fields, 'table'))->render(); ?>
+                    <?php (new FieldRender((array)$group['fields'], $this->types))->render(); ?>
                     </tbody>
                 </table>
             </div>
